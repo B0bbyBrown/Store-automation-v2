@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "csv-parser": "^3.0.0",
+    "fast-csv": "^5.0.1",
+    "node": "^21.6.2"
+  }
+}
