@@ -12,7 +12,6 @@ function generateFolderPath() {
   return `${year}/${month}/${day}/${hour}/${minute}`;
 }
 
-
 async function findLatestCSV(directoryPath) {
   try {
     const files = await fsPromises.readdir(directoryPath);
@@ -116,9 +115,9 @@ async function saveToCSV(filteredData, outputRootDirectory) {
   }
 }
 
-export async function main() {
+export async function mainScraper() {
   try {
-    const convertedDirectoryPath = "./output/converted"; 
+    const convertedDirectoryPath = "./output/converted";
     const outputRootDirectory = "./output/filtered_data";
 
     console.log("Finding the latest CSV file...");
@@ -142,3 +141,5 @@ export async function main() {
     console.error("Error:", error);
   }
 }
+
+mainScraper();
