@@ -134,4 +134,4 @@ export async function mainScraper() {
   }
 }
 
-mainScraper();
+return mainScraper();

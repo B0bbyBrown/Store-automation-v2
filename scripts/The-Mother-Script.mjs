@@ -1,6 +1,5 @@
-import mainDownload from "./Download.mjs";
-import mainConversion from "./Conversion.mjs";
-import mainScraper from "./Scraper.mjs";
+import { mainDownload } from "./Download.mjs";
+import { mainConversion } from "./Conversion.mjs";
 
 async function TheMotherScript() {
   console.log("Starting up The Mother Script...");

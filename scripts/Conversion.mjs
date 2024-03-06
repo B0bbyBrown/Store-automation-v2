@@ -89,7 +89,7 @@ async function processHtmlCsv(inputCsvPath, outputCsvPath) {
 }
 
 // Main function to orchestrate the conversion process
-async function mainConversion() {
+export async function mainConversion() {
   try {
     // Locate the latest CSV file in the "./output" directory and its subdirectories
     const latestInputFile = await findLatestCSV("./output");
