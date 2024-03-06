@@ -12,43 +12,31 @@ function generateFolderPath() {
   return `${year}/${month}/${day}/${hour}/${minute}`;
 }
 
-async function findLatestCSV(directoryPath) {
-  try {
-    const files = await fsPromises.readdir(directoryPath);
-    const csvFiles = files.filter((file) => file.endsWith(".csv"));
+// Function to find the latest CSV file in a directory and its subdirectories
+async function findLatestCSV(convertedDirectoryPath) {
+  let latestFile = null;
+  let latestTime = 0;
 
-    if (csvFiles.length === 0) {
-      throw new Error("No CSV files found in the directory.");
-    }
+  // Recursive function to traverse directories and find CSV files
+  async function traverseDirectories(dirPath) {
+    const files = await fs.promises.readdir(dirPath);
 
-    let latestFile = null;
-    let latestFileMtimeMs = 0;
+    for (const file of files) {
+      const filePath = path.join(dirPath, file);
+      const fileStat = await fs.promises.stat(filePath);
 
-    for (const file of csvFiles) {
-      const filePath = path.join(directoryPath, file);
-      const fileStat = await fsPromises.stat(filePath);
       if (fileStat.isDirectory()) {
-        const subdirectoryLatestFile = await findLatestCSV(filePath);
-        if (
-          subdirectoryLatestFile &&
-          subdirectoryLatestFile.mtimeMs > latestFileMtimeMs
-        ) {
-          latestFile = subdirectoryLatestFile.path;
-          latestFileMtimeMs = subdirectoryLatestFile.mtimeMs;
-        }
-      } else {
-        if (!latestFile || fileStat.mtimeMs > latestFileMtimeMs) {
-          latestFile = filePath;
-          latestFileMtimeMs = fileStat.mtimeMs;
-        }
+        await traverseDirectories(filePath); // Recursively traverse subdirectories
+      } else if (file.endsWith(".csv") && fileStat.mtimeMs > latestTime) {
+        // Update latest file if it's a CSV file and modified later than the current latest
+        latestFile = filePath;
+        latestTime = fileStat.mtimeMs;
       }
     }
-
-    return latestFile ? { path: latestFile, mtimeMs: latestFileMtimeMs } : null;
-  } catch (error) {
-    console.error("Error finding latest CSV file:", error);
-    throw error;
   }
+
+  await traverseDirectories(convertedDirectoryPath); // Start traversing from the specified directory
+  return latestFile;
 }
 
 // Filter data based on a specific condition
@@ -122,19 +110,23 @@ export async function mainScraper() {
 
     console.log("Finding the latest CSV file...");
     const latestCSVFile = await findLatestCSV(convertedDirectoryPath);
-    console.log("Reading the latest CSV file...");
+    console.log("done");
 
+    console.log("Reading the latest CSV file...");
     const csvData = await fsPromises
       .readFile(latestCSVFile.path, "utf-8")
       .then((data) => {
         return data.split("\n").map((row) => row.split(","));
       });
+    console.log("done");
 
     console.log("Filtering data...");
     const filteredData = await filterData(csvData);
+    console.log("done");
 
     console.log("Saving filtered data...");
     const outputPath = await saveToCSV(filteredData, outputRootDirectory);
+    console.log("done");
 
     console.log("Filtered data saved to:", outputPath);
   } catch (error) {
