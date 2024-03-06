@@ -62,60 +62,69 @@ async function findLatestCSV(directoryPath) {
 }
 
 // Function to process HTML-formatted CSV file and save as standard CSV
-async function processHtmlCsv(inputCsvPath, outputCsvPath) {
-  const rows = [];
+function processHtmlCsv(inputCsvPath, outputCsvPath) {
+  return new Promise((resolve, reject) => {
+    const rows = [];
 
-  // Read input CSV file
-  fs.createReadStream(inputCsvPath)
-    .pipe(csv.parse({ headers: true }))
-    .on("error", (error) => console.error("Error parsing CSV:", error))
-    .on("data", (data) => {
-      // Strip HTML tags from the description field
-      if (containsHtmlTags(data.description)) {
-        data.description = stripHtmlTags(data.description);
-      }
-      rows.push(data);
-    })
-    .on("end", () => {
-      // Write processed data to output CSV file
-      ensureDirectoryExistence(outputCsvPath);
-      csv
-        .writeToPath(outputCsvPath, rows, { headers: true })
-        .on("error", (error) => console.error("Error writing CSV file:", error))
-        .on("finish", () =>
-          console.log("Processed CSV file written successfully.")
-        );
-    });
+    // Read input CSV file
+    fs.createReadStream(inputCsvPath)
+      .pipe(csv.parse({ headers: true }))
+      .on("error", (error) => {
+        console.error("Error parsing CSV:", error);
+        reject(error);
+      })
+      .on("data", (data) => {
+        // Strip HTML tags from the description field
+        if (containsHtmlTags(data.description)) {
+          data.description = stripHtmlTags(data.description);
+        }
+        rows.push(data);
+      })
+      .on("end", () => {
+        // Write processed data to output CSV file
+        ensureDirectoryExistence(outputCsvPath);
+        csv
+          .writeToPath(outputCsvPath, rows, { headers: true })
+          .on("error", (error) => {
+            console.error("Error writing CSV file:", error);
+            reject(error);
+          })
+          .on("finish", () => {
+            console.log("Processed CSV file written successfully.");
+            resolve();
+          });
+      });
+  });
 }
 
 // Main function to orchestrate the conversion process
-export async function mainConversion() {
+async function mainConversion() {
   try {
     // Locate the latest CSV file in the "./output" directory and its subdirectories
-    console.log("Finding the latest CSV file...");
+    //console.log("Finding the latest CSV file...");
     const latestInputFile = await findLatestCSV("./output");
-    console.log(" Found:", latestInputFile);
+    //console.log(" Found:", latestInputFile);
 
     // Generate the folder path dynamically based on current date and time
-    console.log("Setting up a dynamic folder path...");
+    //console.log("Setting up a dynamic folder path...");
     const folderPath = generateFolderPath();
-    console.log("Done:", folderPath);
+    //console.log("Done:", folderPath);
 
     // Construct the full path for the output CSV file
-    console.log("Setting up the output CSV file path...");
+    //console.log("Setting up the output CSV file path...");
     const outputCsvPath = `./output/converted/${folderPath}/products-converted.csv`;
-    console.log("Done:", outputCsvPath);
+    //console.log("Done:", outputCsvPath);
 
     // Process HTML-formatted CSV file and save as standard CSV
-    console.log("Converting & Saving HTML-formatted CSV file...");
+    //console.log("Converting & Saving HTML-formatted CSV file...");
     await processHtmlCsv(latestInputFile, outputCsvPath);
-    console.log("Done");
+    //console.log("Done");
 
-    console.log("Conversion process completed successfully.");
+    //console.log("Conversion process completed successfully.");
   } catch (error) {
     console.error("Error occurred during conversion process:", error);
   }
 }
 
-// Call the main function to start the conversion process
-mainConversion();
+// Export the mainConversion function if you want to call it from another script
+export { mainConversion };

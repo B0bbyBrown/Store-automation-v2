@@ -6,21 +6,27 @@ async function TheMotherScript() {
   console.log("Starting up The Mother Script...");
 
   try {
+    //console.log("Initiating download process...");
     await mainDownload();
+    //console.log("Download process completed successfully.");
   } catch (error) {
-    console.error("Error in mainDownload:", error);
+    //console.error("Error in mainDownload:", error);
   }
 
   try {
+    //console.log("Initiating conversion process...");
     await mainConversion();
+    //console.log("Conversion process completed successfully.");
   } catch (error) {
-    console.error("Error in mainConversion:", error);
+    //console.error("Error in mainConversion:", error);
   }
 
   try {
+    //console.log("Initiating scraping process...");
     await mainScraper();
+    //console.log("Scraping process completed successfully.");
   } catch (error) {
-    console.error("Error in mainScraper:", error);
+    //console.error("Error in mainScraper:", error);
   }
 
   console.log("The Mother Script has finished");
