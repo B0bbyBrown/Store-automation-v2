@@ -1,6 +1,7 @@
 import path from "path";
 import { promises as fsPromises } from "fs";
 
+// Function to generate folder name based on current date and time
 function generateFolderPath() {
   const now = new Date();
   const year = now.getFullYear().toString().slice(-2);
@@ -11,6 +12,7 @@ function generateFolderPath() {
   return `${year}/${month}/${day}/${hour}/${minute}`;
 }
 
+// Function to find the latest CSV file in a directory and its subdirectories
 async function findLatestCSV(convertedDirectoryPath) {
   let latestFile = null;
   let latestTime = 0;
@@ -35,6 +37,7 @@ async function findLatestCSV(convertedDirectoryPath) {
   return latestFile;
 }
 
+// Function to filter data based on manufacturer
 async function filterData(csvData) {
   try {
     let manufacturerColumnIndex = -1;
@@ -46,8 +49,6 @@ async function filterData(csvData) {
       }
     }
 
-    console.log("Manufacturer Column Index:", manufacturerColumnIndex);
-
     if (manufacturerColumnIndex === -1) {
       throw new Error("Header 'manufacturer' not found in the CSV file.");
     }
@@ -56,27 +57,16 @@ async function filterData(csvData) {
       if (index === 0) return true;
 
       const manufacturerValue = row[manufacturerColumnIndex];
-      if (!manufacturerValue || manufacturerValue.trim() === "") {
-        return false; // Skip empty rows or rows with undefined manufacturer values
-      }
-
-      return manufacturerValue.includes("TORK CRAFT");
+      return manufacturerValue && manufacturerValue.trim() === "TORK CRAFT";
     });
-
-    if (filteredRows.length === 0) {
-      console.log(
-        `No rows found with "TORK CRAFT" in the manufacturer column.`
-      );
-      return [];
-    }
 
     return filteredRows;
   } catch (error) {
-    console.error("Error filtering data:", error);
     throw error;
   }
 }
 
+// Function to save filtered data to CSV
 async function saveToCSV(filteredData, outputRootDirectory) {
   try {
     if (filteredData.length === 0) {
@@ -96,11 +86,11 @@ async function saveToCSV(filteredData, outputRootDirectory) {
 
     return outputPath;
   } catch (error) {
-    console.error("Error saving filtered data:", error);
     throw error;
   }
 }
 
+// Main function to orchestrate the scraping process
 async function mainScraper() {
   try {
     const convertedDirectoryPath = "./output/converted";
@@ -130,4 +120,5 @@ async function mainScraper() {
   }
 }
 
-mainScraper();
+// Export the mainScraper function if you want to call it from another script
+export { mainScraper };

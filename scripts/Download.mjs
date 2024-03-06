@@ -1,12 +1,6 @@
 import { get } from "https";
-import {
-  existsSync,
-  mkdirSync,
-  createWriteStream,
-  createReadStream,
-  promises as fsPromises,
-} from "fs";
-import { dirname as _dirname } from "path";
+import { existsSync, mkdirSync, createWriteStream, createReadStream } from "fs";
+import { dirname } from "path";
 import { pipeline } from "stream";
 import { promisify } from "util";
 import { createGunzip } from "zlib";
@@ -24,12 +18,10 @@ export function generateFolderPath() {
 
 // Function to ensure directory exists
 export function ensureDirectoryExistence(filePath) {
-  const dirname = _dirname(filePath);
-  if (existsSync(dirname)) {
-    return true;
+  const dirPath = dirname(filePath);
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath, { recursive: true }); // Ensure parent directories also created
   }
-  ensureDirectoryExistence(dirname);
-  mkdirSync(dirname);
 }
 
 // Function to download file from URL
@@ -51,12 +43,8 @@ export async function downloadFile(url, dest) {
         reject(new Error(`Failed to download file: ${error.message}`));
       });
     });
-
-    // console.log(`Download started. Saving to: ${dest}`);
     await pipelineAsync(response, createWriteStream(dest));
-    // console.log(`Download completed successfully. File saved to: ${dest}`);
   } catch (error) {
-    console.error(`Failed to download file: ${error.message}`);
     throw new Error(`Failed to download file: ${error.message}`);
   }
 }
@@ -76,13 +64,11 @@ export async function unzipFile(inputFilePath, outputFilePath) {
 }
 
 // Main Method
-export async function mainDownload() {
+async function mainDownload() {
   try {
-    console.log("Starting up scripting engine...");
     const url = "https://www.vermontsales.co.za/exports_v2/products.csv.gz";
     const downloadPath = "./output/downloads";
     const unzipPath = "./output/unzipped";
-    console.log("Ready to go!");
 
     // Generate file & path dynamically
     console.log("Busy setting up a dynamic folder path...");
@@ -108,11 +94,11 @@ export async function mainDownload() {
     // Unzip the file
     console.log("Unzipping file...");
     await unzipFile(filePath, outputFilePath);
-    console.log("Youre all sorted, find your file in the unzipped folder");
+    console.log("You're all sorted, find your file in the unzipped folder");
   } catch (error) {
     console.error("Error:", error);
   }
 }
 
-// Execute main method
-mainDownload();
+// Export the mainDownload function if you want to call it from another script
+export { mainDownload };

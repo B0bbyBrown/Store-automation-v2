@@ -92,16 +92,24 @@ async function processHtmlCsv(inputCsvPath, outputCsvPath) {
 export async function mainConversion() {
   try {
     // Locate the latest CSV file in the "./output" directory and its subdirectories
+    console.log("Finding the latest CSV file...");
     const latestInputFile = await findLatestCSV("./output");
+    console.log(" Found:", latestInputFile);
 
     // Generate the folder path dynamically based on current date and time
+    console.log("Setting up a dynamic folder path...");
     const folderPath = generateFolderPath();
+    console.log("Done:", folderPath);
 
     // Construct the full path for the output CSV file
+    console.log("Setting up the output CSV file path...");
     const outputCsvPath = `./output/converted/${folderPath}/products-converted.csv`;
+    console.log("Done:", outputCsvPath);
 
     // Process HTML-formatted CSV file and save as standard CSV
+    console.log("Converting & Saving HTML-formatted CSV file...");
     await processHtmlCsv(latestInputFile, outputCsvPath);
+    console.log("Done");
 
     console.log("Conversion process completed successfully.");
   } catch (error) {
