@@ -1,7 +1,6 @@
 import path from "path";
-import { createWriteStream, promises as fsPromises } from "fs";
+import { promises as fsPromises } from "fs";
 
-// Function to generate folder name based on current date and time
 function generateFolderPath() {
   const now = new Date();
   const year = now.getFullYear().toString().slice(-2);
@@ -12,39 +11,34 @@ function generateFolderPath() {
   return `${year}/${month}/${day}/${hour}/${minute}`;
 }
 
-// Function to find the latest CSV file in a directory and its subdirectories
 async function findLatestCSV(convertedDirectoryPath) {
   let latestFile = null;
   let latestTime = 0;
 
-  // Recursive function to traverse directories and find CSV files
-  async function traverseDirectories(dirPath) {
-    const files = await fs.promises.readdir(dirPath);
+  async function traverseDirectories(output) {
+    const files = await fsPromises.readdir(output);
 
     for (const file of files) {
-      const filePath = path.join(dirPath, file);
-      const fileStat = await fs.promises.stat(filePath);
+      const filePath = path.join(output, file);
+      const fileStat = await fsPromises.stat(filePath);
 
       if (fileStat.isDirectory()) {
-        await traverseDirectories(filePath); // Recursively traverse subdirectories
+        await traverseDirectories(filePath);
       } else if (file.endsWith(".csv") && fileStat.mtimeMs > latestTime) {
-        // Update latest file if it's a CSV file and modified later than the current latest
         latestFile = filePath;
         latestTime = fileStat.mtimeMs;
       }
     }
   }
 
-  await traverseDirectories(convertedDirectoryPath); // Start traversing from the specified directory
+  await traverseDirectories(convertedDirectoryPath);
   return latestFile;
 }
 
-// Filter data based on a specific condition
 async function filterData(csvData) {
   try {
     let manufacturerColumnIndex = -1;
 
-    // Find the index of the column containing the header "manufacturer"
     for (let i = 0; i < csvData[0].length; i++) {
       if (csvData[0][i] === "manufacturer") {
         manufacturerColumnIndex = i;
@@ -52,14 +46,21 @@ async function filterData(csvData) {
       }
     }
 
+    console.log("Manufacturer Column Index:", manufacturerColumnIndex);
+
     if (manufacturerColumnIndex === -1) {
       throw new Error("Header 'manufacturer' not found in the CSV file.");
     }
 
     const filteredRows = csvData.filter((row, index) => {
-      if (index === 0) return true; // Include the header row
+      if (index === 0) return true;
 
-      return row[manufacturerColumnIndex].includes("TORK CRAFT");
+      const manufacturerValue = row[manufacturerColumnIndex];
+      if (!manufacturerValue || manufacturerValue.trim() === "") {
+        return false; // Skip empty rows or rows with undefined manufacturer values
+      }
+
+      return manufacturerValue.includes("TORK CRAFT");
     });
 
     if (filteredRows.length === 0) {
@@ -90,11 +91,8 @@ async function saveToCSV(filteredData, outputRootDirectory) {
     const fileName = "filtered_data.csv";
     const outputPath = path.join(filteredFolderPath, fileName);
 
-    const csvWriter = createWriteStream(outputPath);
-    filteredData.forEach((row) => {
-      csvWriter.write(`${row.join(",")}\n`);
-    });
-    csvWriter.end();
+    const csvContent = filteredData.map((row) => row.join(",")).join("\n");
+    await fsPromises.writeFile(outputPath, csvContent);
 
     return outputPath;
   } catch (error) {
@@ -103,7 +101,7 @@ async function saveToCSV(filteredData, outputRootDirectory) {
   }
 }
 
-export async function mainScraper() {
+async function mainScraper() {
   try {
     const convertedDirectoryPath = "./output/converted";
     const outputRootDirectory = "./output/filtered_data";
@@ -114,10 +112,8 @@ export async function mainScraper() {
 
     console.log("Reading the latest CSV file...");
     const csvData = await fsPromises
-      .readFile(latestCSVFile.path, "utf-8")
-      .then((data) => {
-        return data.split("\n").map((row) => row.split(","));
-      });
+      .readFile(latestCSVFile, "utf-8")
+      .then((data) => data.split("\n").map((row) => row.split(",")));
     console.log("done");
 
     console.log("Filtering data...");
@@ -134,4 +130,4 @@ export async function mainScraper() {
   }
 }
 
-return mainScraper();
+mainScraper();
