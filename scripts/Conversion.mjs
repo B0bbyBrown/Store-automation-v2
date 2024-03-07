@@ -97,34 +97,30 @@ function processHtmlCsv(inputCsvPath, outputCsvPath) {
   });
 }
 
-// Main function to orchestrate the conversion process
+// Main Method
 async function mainConversion() {
   try {
-    // Locate the latest CSV file in the "./output" directory and its subdirectories
-    //console.log("Finding the latest CSV file...");
+    console.log("Finding the latest CSV file...");
     const latestInputFile = await findLatestCSV("./output");
-    //console.log(" Found:", latestInputFile);
+    console.log("Found:", latestInputFile);
 
-    // Generate the folder path dynamically based on current date and time
-    //console.log("Setting up a dynamic folder path...");
+    console.log("Setting up a dynamic folder path...");
     const folderPath = generateFolderPath();
-    //console.log("Done:", folderPath);
+    console.log("Done:", folderPath);
 
-    // Construct the full path for the output CSV file
-    //console.log("Setting up the output CSV file path...");
+    console.log("Setting up the output CSV file path...");
     const outputCsvPath = `./output/converted/${folderPath}/products-converted.csv`;
-    //console.log("Done:", outputCsvPath);
+    console.log("Done:", outputCsvPath);
 
-    // Process HTML-formatted CSV file and save as standard CSV
-    //console.log("Converting & Saving HTML-formatted CSV file...");
+    console.log("Converting & Saving HTML-formatted CSV file...");
     await processHtmlCsv(latestInputFile, outputCsvPath);
-    //console.log("Done");
+    console.log("Done");
 
-    //console.log("Conversion process completed successfully.");
+    console.log("Conversion process completed successfully.");
   } catch (error) {
     console.error("Error occurred during conversion process:", error);
   }
 }
 
-// Export the mainConversion function if you want to call it from another script
+// Export mainConversion
 export { mainConversion };

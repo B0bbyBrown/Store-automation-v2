@@ -70,7 +70,6 @@ async function mainDownload() {
     const downloadPath = "./output/downloads";
     const unzipPath = "./output/unzipped";
 
-    // Generate file & path dynamically
     console.log("Busy setting up a dynamic folder path...");
     const fileName = generateFolderPath();
     console.log("Done");
@@ -78,20 +77,18 @@ async function mainDownload() {
     const filePath = `${downloadPath}/${fileName}`;
     const outputFilePath = `${unzipPath}/products.csv`;
 
-    // Ensure directory exists
     console.log("Making sure a folder exists for csv.gz file...");
     ensureDirectoryExistence(filePath);
     console.log("Found it");
+
     console.log("Making sure a folder exists for unzipped file...");
     ensureDirectoryExistence(outputFilePath);
     console.log("Found it");
 
-    // Download file
     console.log("Downloading file...");
     await downloadFile(url, filePath);
     console.log("Done");
 
-    // Unzip the file
     console.log("Unzipping file...");
     await unzipFile(filePath, outputFilePath);
     console.log("You're all sorted, find your file in the unzipped folder");
@@ -100,5 +97,5 @@ async function mainDownload() {
   }
 }
 
-// Export the mainDownload function if you want to call it from another script
+// Export mainDownload
 export { mainDownload };

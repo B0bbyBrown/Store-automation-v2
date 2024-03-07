@@ -90,7 +90,7 @@ async function saveToCSV(filteredData, outputRootDirectory) {
   }
 }
 
-// Main function to orchestrate the scraping process
+// Main Method
 async function mainScraper() {
   try {
     const convertedDirectoryPath = "./output/converted";
@@ -120,5 +120,5 @@ async function mainScraper() {
   }
 }
 
-// Export the mainScraper function if you want to call it from another script
+// Export mainScraper
 export { mainScraper };
