@@ -1,6 +1,7 @@
 import { mainDownload } from "./Download.mjs";
 import { mainConversion } from "./Conversion.mjs";
 import { mainScraper } from "./Scraper.mjs";
+import { mainWoocommerce } from "./Woocommerce.mjs";
 
 async function TheMotherScript() {
   console.log("Starting up The Mother Script...");
@@ -27,6 +28,14 @@ async function TheMotherScript() {
     console.log("Scraping process completed successfully.");
   } catch (error) {
     console.error("Error in mainScraper:", error);
+  }
+
+  try {
+    console.log("Initiating upload process...");
+    await mainWoocommerce();
+    console.log("Upload process completed successfully.");
+  } catch (error) {
+    console.error("Error in mainWooCommerce:", error);
   }
 
   console.log("The Mother Script has finished");
