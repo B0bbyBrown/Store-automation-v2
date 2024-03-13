@@ -9,10 +9,10 @@ function containsHtmlTags(text) {
   return $("*").length > 0; // Check if any HTML elements exist
 }
 
-// Function to strip HTML tags from a string
+// Function to strip HTML tags from a string and trim whitespace
 function stripHtmlTags(html) {
   const $ = cheerio.load(html);
-  return $.text();
+  return $.text().trim(); // Trim whitespace
 }
 
 // Function to ensure directory exists
@@ -62,7 +62,7 @@ async function findLatestCSV(directoryPath) {
 }
 
 // Function to process HTML-formatted CSV file and save as standard CSV
-function processHtmlCsv(inputCsvPath, outputCsvPath) {
+async function processHtmlCsv(inputCsvPath, outputCsvPath) {
   return new Promise((resolve, reject) => {
     const rows = [];
 
@@ -74,17 +74,23 @@ function processHtmlCsv(inputCsvPath, outputCsvPath) {
         reject(error);
       })
       .on("data", (data) => {
-        // Strip HTML tags from the description field
-        if (containsHtmlTags(data.description)) {
-          data.description = stripHtmlTags(data.description);
+        // Strip HTML tags from the description field and trim white space
+        if (data.description && containsHtmlTags(data.description)) {
+          data.description = stripHtmlTags(data.description)
+            .replace(/\s+/g, " ")
+            .trim();
         }
+        // Trim white space from all fields
+        Object.keys(data).forEach((key) => {
+          data[key] = data[key].replace(/\s+/g, " ").trim();
+        });
         rows.push(data);
       })
       .on("end", () => {
         // Write processed data to output CSV file
         ensureDirectoryExistence(outputCsvPath);
         csv
-          .writeToPath(outputCsvPath, rows, { headers: true })
+          .writeToPath(outputCsvPath, rows, { headers: true }) // Remove trim option
           .on("error", (error) => {
             console.error("Error writing CSV file:", error);
             reject(error);

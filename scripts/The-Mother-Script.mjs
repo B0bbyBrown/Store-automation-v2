@@ -1,7 +1,7 @@
 import { mainDownload } from "./Download.mjs";
 import { mainConversion } from "./Conversion.mjs";
 import { mainScraper } from "./Scraper.mjs";
-import { mainWoocommerce } from "./Woocommerce.mjs";
+import { mainWooRephrase } from "./WooRephrase.mjs";
 
 async function TheMotherScript() {
   console.log("Starting up The Mother Script...");
@@ -31,11 +31,11 @@ async function TheMotherScript() {
   }
 
   try {
-    console.log("Initiating upload process...");
-    await mainWoocommerce();
-    console.log("Upload process completed successfully.");
+    console.log("Initiating rephrasing process...");
+    await mainWooRephrase();
+    console.log("Rephrasing process completed successfully.");
   } catch (error) {
-    console.error("Error in mainWooCommerce:", error);
+    console.error("Error in mainWooRephrase:", error);
   }
 
   console.log("The Mother Script has finished");
