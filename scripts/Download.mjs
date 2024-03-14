@@ -70,28 +70,28 @@ async function mainDownload() {
     const downloadPath = "./output/downloads";
     const unzipPath = "./output/unzipped";
 
-    console.log("Busy setting up a dynamic folder path...");
+    //console.log("Busy setting up a dynamic folder path...");
     const fileName = generateFolderPath();
-    console.log("Done");
+    //console.log("Done");
 
     const filePath = `${downloadPath}/${fileName}`;
     const outputFilePath = `${unzipPath}/products.csv`;
 
-    console.log("Making sure a folder exists for csv.gz file...");
+    //console.log("Making sure a folder exists for csv.gz file...");
     ensureDirectoryExistence(filePath);
-    console.log("Found it");
+    //console.log("Found it");
 
-    console.log("Making sure a folder exists for unzipped file...");
+    //console.log("Making sure a folder exists for unzipped file...");
     ensureDirectoryExistence(outputFilePath);
-    console.log("Found it");
+    //console.log("Found it");
 
-    console.log("Downloading file...");
+    //console.log("Downloading file...");
     await downloadFile(url, filePath);
-    console.log("Done");
+    //console.log("Done");
 
-    console.log("Unzipping file...");
+    //console.log("Unzipping file...");
     await unzipFile(filePath, outputFilePath);
-    console.log("You're all sorted, find your file in the unzipped folder");
+    //console.log("You're all sorted, find your file in the ./output/unzipped folder.");
   } catch (error) {
     console.error("Error:", error);
   }

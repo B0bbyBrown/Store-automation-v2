@@ -96,23 +96,23 @@ async function mainScraper() {
     const convertedDirectoryPath = "./output/converted";
     const outputRootDirectory = "./output/filtered_data";
 
-    console.log("Finding the latest CSV file...");
+    //console.log("Finding the latest CSV file...");
     const latestCSVFile = await findLatestCSV(convertedDirectoryPath);
-    console.log("done");
+    //console.log("done");
 
-    console.log("Reading the latest CSV file...");
+    //console.log("Reading the latest CSV file...");
     const csvData = await fsPromises
       .readFile(latestCSVFile, "utf-8")
       .then((data) => data.split("\n").map((row) => row.split(",")));
-    console.log("done");
+    //console.log("done");
 
-    console.log("Filtering data...");
+    //console.log("Filtering data...");
     const filteredData = await filterData(csvData);
-    console.log("done");
+    //console.log("done");
 
-    console.log("Saving filtered data...");
+    //console.log("Saving filtered data...");
     const outputPath = await saveToCSV(filteredData, outputRootDirectory);
-    console.log("done");
+    //console.log("done");
 
     console.log("Filtered data saved to:", outputPath);
   } catch (error) {

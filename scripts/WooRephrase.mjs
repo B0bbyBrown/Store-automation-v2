@@ -113,21 +113,21 @@ async function rephraseCSVHeaders(inputCsvPath, outputCsvPath) {
 // Main function to perform WooRephrase
 async function mainWooRephrase() {
   try {
-    console.log("Finding the latest CSV file...");
+    //console.log("Finding the latest CSV file...");
     const latestInputFile = await findLatestCSV("./output/filtered_data/");
-    console.log("Found:", latestInputFile);
+    //console.log("Found:", latestInputFile);
 
-    console.log("Setting up a dynamic folder path...");
+    //console.log("Setting up a dynamic folder path...");
     const folderPath = generateFolderPath();
-    console.log("Done:", folderPath);
+    //console.log("Done:", folderPath);
 
-    console.log("Setting up the output CSV file path...");
+    //console.log("Setting up the output CSV file path...");
     const outputCsvPath = path.join(folderPath, "rephrased.csv");
-    console.log("Done:", outputCsvPath);
+    //console.log("Done:", outputCsvPath);
 
-    console.log("Rephrasing CSV headers...");
+    //console.log("Rephrasing CSV headers...");
     await rephraseCSVHeaders(latestInputFile, outputCsvPath);
-    console.log("Rephrasing completed successfully.");
+    //console.log("Rephrasing completed successfully.");
 
     console.log("WooRephrase process completed successfully.");
   } catch (error) {
