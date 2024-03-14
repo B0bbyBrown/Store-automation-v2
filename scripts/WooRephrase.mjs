@@ -129,7 +129,7 @@ async function mainWooRephrase() {
     await rephraseCSVHeaders(latestInputFile, outputCsvPath);
     //console.log("Rephrasing completed successfully.");
 
-    console.log("WooRephrase process completed successfully.");
+    //console.log("WooRephrase process completed successfully.");
   } catch (error) {
     console.error("Error occurred during WooRephrase process:", error);
   }
