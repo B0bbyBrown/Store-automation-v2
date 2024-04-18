@@ -3,4 +3,5 @@ output
 package-lock.json
 package.json
 api_keys.json
+settings.json
 .env

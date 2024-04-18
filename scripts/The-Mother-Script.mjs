@@ -2,7 +2,7 @@ import { mainDownload } from "./Download.mjs";
 import { mainConversion } from "./Conversion.mjs";
 import { mainScraper } from "./Scraper.mjs";
 import { mainWooRephrase } from "./WooRephrase.mjs";
-import { mainUpload } from "./Upload.mjs";
+//import { mainUpload } from "./Upload.mjs";
 
 async function TheMotherScript() {
   console.log("Starting up The Mother Script...");
@@ -39,13 +39,13 @@ async function TheMotherScript() {
     console.error("Error in mainWooRephrase:", error);
   }
 
-  try {
-    console.log("Initiating Upload process...");
-    await mainUpload();
-    console.log("Upload process completed successfully.");
-  } catch (error) {
-    console.error("Error in mainUpload:", error);
-  }
+  // try {
+  //   console.log("Initiating Upload process...");
+  //   await mainUpload();
+  //   console.log("Upload process completed successfully.");
+  // } catch (error) {
+  //   console.error("Error in mainUpload:", error);
+  // }
 
   console.log("The Mother Script has finished");
 }

@@ -19,7 +19,6 @@ const headerMapping = {
   tag: "tags",
   meta_keyword: "meta_data",
   weight: "weight",
-  // barcode: "sku", // Optional, if not already mapped to 'model'
   k8_branch: "attribute",
   is_essential: "is_essential",
   is_accessory: "is_accessory",
