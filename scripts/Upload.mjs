@@ -131,7 +131,7 @@ const parseCSV = (filePath) => {
           date_on_sale_from,
           date_on_sale_to,
           dimensions: {
-            length: parseFloat(dimensions_length), // Parse to float
+            length: parseFloat(dimensions_length),
             width: parseFloat(dimensions_width),
             height: parseFloat(dimensions_height),
           },

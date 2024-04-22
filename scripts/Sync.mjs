@@ -67,7 +67,6 @@ async function mainSync() {
   }
 }
 
-//Main Method
 mainSync();
 
 function asyncTransform(operation) {
@@ -128,13 +127,16 @@ async function parseCSV(csvFilePath) {
       .pipe(csv({ delimiter: ",", columns: true }))
       .pipe(
         asyncTransform(async (row) => {
+          console.log("Raw CSV Row:", row);
           const basicProduct = mapProductBasics(row);
+          console.log("Mapped Basics:", basicProduct);
           basicProduct.attributes = formatAttributes(
             row.description,
             row.tags,
             row.meta_data
           );
           basicProduct.meta_data = formatMetaData(row.meta_data);
+          console.log("Final Product Data:", basicProduct);
           return basicProduct;
         })
       )
@@ -147,11 +149,6 @@ async function parseCSV(csvFilePath) {
   });
 }
 
-// Additional functions remain unchanged for brevity
-
-console.log("All Done!");
-
-brand;
 //get Products from Store
 async function getWooCommerceProducts() {
   let retryCount = 0;

@@ -40,11 +40,11 @@ async function TheMotherScript() {
   }
 
   // try {
-  //   console.log("Initiating Upload process...");
-  //   await mainUpload();
-  //   console.log("Upload process completed successfully.");
+  //   console.log("Initiating Sync process...");
+  //   await mainSync();
+  //   console.log("Sync process completed successfully.");
   // } catch (error) {
-  //   console.error("Error in mainUpload:", error);
+  //   console.error("Error in mainSync:", error);
   // }
 
   console.log("The Mother Script has finished");

@@ -69,33 +69,50 @@ function formatMetaData(csvMetaData) {
   return metaData;
 }
 
-//format attributes
 function formatAttributes(csvDescription, csvTags, csvMetaData) {
   const attributes = [];
-  const brandMatch = csvDescription.match(/Brand: (.*)/);
-  if (brandMatch) {
+
+  // Handle brand extraction
+  addBrandAttribute(csvDescription, attributes);
+
+  // Handle tags
+  addTagAttributes(csvTags, attributes);
+
+  // Handle meta data
+  addMetaDataAttributes(csvMetaData, attributes);
+
+  return attributes;
+}
+
+function addBrandAttribute(description, attributes) {
+  const brandMatch = description.match(/brand:\s*(.+)/i);
+  if (brandMatch && brandMatch[1]) {
     attributes.push({
       name: "Brand",
       options: [brandMatch[1].trim()],
       visible: true,
     });
+  } else {
+    console.log("No brand extracted from description:", description);
   }
+}
 
-  csvTags
+function addTagAttributes(tags, attributes) {
+  tags
     .split(",")
     .filter((tag) => tag.trim())
     .forEach((tag) => {
       attributes.push({ name: tag.trim(), options: [tag], visible: true });
     });
+}
 
-  csvMetaData
+function addMetaDataAttributes(metaData, attributes) {
+  metaData
     .split(",")
     .filter((keyword) => keyword.trim())
     .forEach((keyword) => {
       attributes.push({ name: keyword, options: [keyword], visible: true });
     });
-
-  return attributes;
 }
 
 // Extend mapProductBasics to include dimensions and custom attributes
@@ -104,6 +121,7 @@ function mapProductBasics(row) {
   return {
     sku: row.sku,
     name: row.name,
+    brand: row.brand,
     images: images,
     permalink: row.permalink,
     regular_price: row.regular_price,
