@@ -57,7 +57,6 @@ const findLatestCSV = (dirPath) => {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
     if (stats.isDirectory()) {
-      // Recursively search subdirectories
       const subdirectoryLatestCSV = findLatestCSV(filePath);
       if (
         subdirectoryLatestCSV &&
@@ -118,7 +117,7 @@ const parseCSV = (filePath) => {
 
         if (!sku) {
           console.warn("SKU is missing for a product. Skipping...");
-          callback(); // Skip processing this row
+          callback();
           return;
         }
 

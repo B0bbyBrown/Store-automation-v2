@@ -20,7 +20,9 @@ async function mainSync() {
     !process.env.WC_CONSUMER_KEY ||
     !process.env.WC_CONSUMER_SECRET
   ) {
-    console.error("Missing environment variables. Check your .env file.");
+    console.error(
+      "Missing environment variables: WC_URL, WC_CONSUMER_KEY, WC_CONSUMER_SECRET. Check your .env file."
+    );
     process.exit(1);
   }
 
@@ -32,13 +34,13 @@ async function mainSync() {
     axiosConfig: { timeout: 10000 },
   });
 
-  console.log("Connected to woo api");
+  console.log("Successfully connected to Woo API.");
 
   const rootDirPath = process.env.CSV_DIRECTORY || "./output/woo_rephrase";
-
   const latestCSV = findLatestCSV(rootDirPath);
+
   if (!latestCSV) {
-    console.error("No CSV files found.");
+    console.error("No CSV files found in the directory:", rootDirPath);
     return;
   }
 
@@ -46,7 +48,7 @@ async function mainSync() {
   try {
     const csvProducts = await parseCSV(latestCSV.filePath);
     console.log(
-      `CSV file successfully processed with ${csvProducts.length} products`
+      `CSV file successfully processed with ${csvProducts.length} products.`
     );
 
     const storeProducts = await getWooCommerceProducts();
@@ -65,6 +67,7 @@ async function mainSync() {
   }
 }
 
+//Main Method
 mainSync();
 
 function asyncTransform(operation) {
@@ -76,12 +79,14 @@ function asyncTransform(operation) {
         this.push(result);
         callback();
       } catch (error) {
+        console.error("Error during async transformation:", error);
         callback(error);
       }
     },
   });
 }
 
+//Find Latest CSV
 function findLatestCSV(rootDirPath) {
   try {
     let latestCSV = null;
@@ -110,11 +115,12 @@ function findLatestCSV(rootDirPath) {
     });
     return latestCSV;
   } catch (error) {
-    console.error("Error searching for CSV:", error);
+    console.error("Error searching for CSV in directory:", rootDirPath, error);
     return null;
   }
 }
 
+//Parse CSV
 async function parseCSV(csvFilePath) {
   const products = [];
   return new Promise((resolve, reject) => {
@@ -134,14 +140,23 @@ async function parseCSV(csvFilePath) {
       )
       .on("data", (product) => products.push(product))
       .on("end", () => resolve(products))
-      .on("error", (error) => reject(error));
+      .on("error", (error) => {
+        console.error("Error parsing CSV file:", csvFilePath, error);
+        reject(error);
+      });
   });
 }
 
+// Additional functions remain unchanged for brevity
+
+console.log("All Done!");
+
+brand;
+//get Products from Store
 async function getWooCommerceProducts() {
   let retryCount = 0;
   const maxRetries = 3;
-  const retryDelay = 1000; // Start with 1 second
+  const retryDelay = 1000;
 
   while (retryCount < maxRetries) {
     try {
@@ -170,12 +185,12 @@ async function getWooCommerceProducts() {
           "Error retrieving products from WooCommerce, maximum retries reached",
           error
         );
-        break; // Exit after maximum retries
+        break;
       }
       console.log(`Retrying... Attempt ${retryCount}`);
       await new Promise((resolve) =>
         setTimeout(resolve, retryDelay * retryCount)
-      ); // Exponential backoff
+      );
     }
   }
 }
@@ -184,14 +199,13 @@ console.log("Products retrieved");
 
 console.log("Comparing Products to CSV");
 
-// Efficient Category Creation
-let brandCategories = {}; // Store created categories to avoid duplicates
+let brandCategories = {};
 
+//Find or Create Category
 const findOrCreateCategory = async (brandName) => {
-  // Check if brandName is undefined or empty and handle it
   if (!brandName) {
     console.error("Brand name is undefined or empty.");
-    return null; // Or handle it by assigning a default category, if applicable
+    return null;
   }
 
   const slug = brandName.toLowerCase().replace(/\s+/g, "-");
@@ -221,10 +235,11 @@ const findOrCreateCategory = async (brandName) => {
     }
   } catch (error) {
     console.error("Failed to find or create category:", error);
-    throw error; // Re-throw to handle upstream
+    throw error;
   }
 };
 
+//Compare Products
 const compareProducts = async (csvProducts, storeProducts) => {
   const newProducts = [];
   const updatedProducts = [];
@@ -272,8 +287,9 @@ console.log("Products Compared");
 
 console.log("Uploading Products");
 
+//Upload
 const uploadProducts = async (newProducts) => {
-  const batchSize = 100; // Adjust the batch size based on your specific needs and API limits
+  const batchSize = 100;
   for (let i = 0; i < newProducts.length; i += batchSize) {
     const batch = newProducts.slice(i, i + batchSize);
     try {
@@ -286,7 +302,7 @@ const uploadProducts = async (newProducts) => {
         name: "uploadProducts",
         canRetry: true,
         retryCount: 0,
-        callback: () => uploadProducts(batch), // Retry with the same batch
+        callback: () => uploadProducts(batch),
       });
     }
   }
@@ -307,7 +323,7 @@ const updateProducts = async (updatedProducts) => {
         name: "updateProducts",
         canRetry: true,
         retryCount: 0,
-        callback: () => updateProducts(batch), // Retry with the same batch
+        callback: () => updateProducts(batch),
       });
     }
   }
@@ -317,7 +333,7 @@ console.log("Products updated");
 
 console.log("Deleting products");
 
-// Function to delete products not in CSV
+// Delete
 const deleteProducts = async (deletedSKUs) => {
   const productsToDelete = storeProducts.filter((product) =>
     deletedSKUs.includes(product.sku)
@@ -338,7 +354,7 @@ const deleteProducts = async (deletedSKUs) => {
         name: "deleteProducts",
         canRetry: true,
         retryCount: 0,
-        callback: () => deleteProducts(batch), // Retry with the same batch
+        callback: () => deleteProducts(batch),
       });
     }
   }
