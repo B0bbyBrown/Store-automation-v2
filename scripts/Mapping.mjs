@@ -28,17 +28,43 @@ async function createCategory(categoryName, parentCategoryId) {
     );
 
     const data = await response.json();
-    if (response.ok) {
-      categoryCache[categoryName] = data.id;
-      return data.id;
-    } else {
-      throw new Error(
-        `Failed to create category: ${data.message || "Unknown error"}`
-      );
-    }
+    categoryCache[categoryName] = data.id;
+    return data.id;
   } catch (error) {
     console.error("Error creating category:", error);
-    throw error; // Ensuring that errors are propagated up the stack
+    return null; // Handle as you see fit for your error management strategy
+  }
+}
+
+// Delete unused catagories
+async function deleteUnusedCategories(usedCategories) {
+  const allCategories = await fetch(
+    `${process.env.WC_URL}/wp-json/wc/v3/products/categories`,
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(
+          `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
+        ).toString("base64")}`,
+      },
+    }
+  ).then((res) => res.json());
+
+  const categoriesToDelete = allCategories.filter(
+    (cat) => !usedCategories.includes(cat.id)
+  );
+
+  for (const category of categoriesToDelete) {
+    await fetch(
+      `${process.env.WC_URL}/wp-json/wc/v3/products/categories/${category.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Basic ${Buffer.from(
+            `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
+          ).toString("base64")}`,
+        },
+      }
+    );
   }
 }
 
@@ -58,104 +84,75 @@ async function mapCategories(csvCategories) {
 }
 
 //format metadata
-function formatMetaData(csvMetaData) {
+function formatMetaData(metaDataString) {
   const metaData = [];
-  csvMetaData.split(";").forEach((item) => {
-    const [key, value] = item.split(":").map((part) => part.trim());
+  const entries = metaDataString.split(";");
+  entries.forEach((entry) => {
+    const [key, value] = entry.split(":");
     if (key && value) {
-      metaData.push({ key, value });
+      metaData.push({ key: key.trim(), value: value.trim() });
     }
   });
   return metaData;
 }
 
-function formatAttributes(csvDescription, csvTags, csvMetaData) {
-  const attributes = [];
+const productFieldMapping = {
+  sku: "sku",
+  name: "name",
+  images: "images",
+  permalink: "permalink",
+  dimensions_length: "dimensions.length",
+  dimensions_width: "dimensions.width",
+  dimensions_height: "dimensions.height",
+  stock_quantity: "stock_quantity",
+  regular_price: "regular_price",
+  brand: "brand",
+  description: "description",
+  tags: "tags",
+  meta_data: "meta_data",
+  weight: "weight",
+  // Add other mappings as necessary
+};
 
-  // Handle brand extraction
-  addBrandAttribute(csvDescription, attributes);
-
-  // Handle tags
-  addTagAttributes(csvTags, attributes);
-
-  // Handle meta data
-  addMetaDataAttributes(csvMetaData, attributes);
-
-  return attributes;
-}
-
-function addBrandAttribute(description, attributes) {
-  const brandMatch = description.match(/brand:\s*(.+)/i);
-  if (brandMatch && brandMatch[1]) {
-    attributes.push({
-      name: "Brand",
-      options: [brandMatch[1].trim()],
-      visible: true,
-    });
-  } else {
-    console.log("No brand extracted from description:", description);
-  }
-}
-
-function addTagAttributes(tags, attributes) {
-  tags
-    .split(",")
-    .filter((tag) => tag.trim())
-    .forEach((tag) => {
-      attributes.push({ name: tag.trim(), options: [tag], visible: true });
-    });
-}
-
-function addMetaDataAttributes(metaData, attributes) {
-  metaData
-    .split(",")
-    .filter((keyword) => keyword.trim())
-    .forEach((keyword) => {
-      attributes.push({ name: keyword, options: [keyword], visible: true });
-    });
-}
-
-// Extend mapProductBasics to include dimensions and custom attributes
+//Map Products
 function mapProductBasics(row) {
-  const images = row.images.split(";").map((image) => ({ src: image.trim() }));
+  const images = row.images
+    ? row.images.split(";").map((image) => ({ src: image.trim() }))
+    : [];
+  const brand = row.brand || "Unknown Brand";
+  const tags = row.tags
+    ? row.tags.split(",").map((tag) => ({ name: tag.trim() }))
+    : [];
+
+  const stockQuantity = parseInt(row.stock_quantity) || 0;
+
   return {
     sku: row.sku,
     name: row.name,
-    brand: row.brand,
     images: images,
     permalink: row.permalink,
-    regular_price: row.regular_price,
-    description: row.description,
-    tags: row.tags.split(",").map((tag) => tag.trim()),
     dimensions: {
       length: row.dimensions_length,
       width: row.dimensions_width,
       height: row.dimensions_height,
     },
-    weight: row.weight,
-    meta_data: [
-      ...formatMetaData(row.meta_data),
-      { key: "barcode", value: row.barcode },
-      { key: "minimum_allowed_quantity", value: row.minimum_allowed_quantity },
-      { key: "date_expected", value: row.date_expected },
-      { key: "erp_status", value: row.erp_status },
-    ],
-    stock_quantity:
-      parseInt(row.stock_quantity) > 0 ? parseInt(row.stock_quantity) : null,
+    stock_quantity: stockQuantity,
+    regular_price: row.regular_price,
+    brand: row.brand,
+    description: row.description || "",
+    tags: tags,
+    meta_data: formatMetaData(row.meta_data || ""),
+    weight: row.weight || "0",
     manage_stock: true,
     backorders: "no",
-    attributes: formatAttributes(
-      row.description,
-      row.tags,
-      `${row.attribute};${row.is_essential};${row.is_accessory};${row.is_spare}`
-    ),
   };
 }
 
 export {
+  deleteUnusedCategories,
   mapProductBasics,
   mapCategories,
-  formatAttributes,
   createCategory,
   formatMetaData,
+  productFieldMapping,
 };
