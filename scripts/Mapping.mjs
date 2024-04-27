@@ -69,18 +69,19 @@ async function deleteUnusedCategories(usedCategories) {
 }
 
 // Map categories
-async function mapCategories(csvCategories) {
-  const categories = [];
-  const categoryNames = csvCategories.split(" > ");
+// Assumes category information is structured as [{id: "Category > Subcategory > Sub-subcategory"}, ...]
+async function mapCategories(categoryJson) {
+  const categories = JSON.parse(categoryJson);
   let parentCategoryId = null;
 
-  for (const categoryName of categoryNames) {
-    const categoryId = await createCategory(categoryName, parentCategoryId);
-    categories.push({ id: categoryId, name: categoryName });
-    parentCategoryId = categoryId; // Set for next category in the hierarchy
+  for (const category of categories) {
+    let categoryPath = category.id.split(" > ");
+    for (let categoryName of categoryPath) {
+      parentCategoryId = await createCategory(categoryName, parentCategoryId);
+    }
   }
 
-  return categories;
+  return parentCategoryId; // Return the ID of the last category in the hierarchy for product association
 }
 
 //format metadata

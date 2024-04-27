@@ -2,7 +2,7 @@ import { mainDownload } from "./Download.mjs";
 import { mainConversion } from "./Conversion.mjs";
 import { mainScraper } from "./Scraper.mjs";
 import { mainWooRephrase } from "./WooRephrase.mjs";
-//import { mainUpload } from "./Upload.mjs";
+// import { mainFinalTouches } from "./Final-Touches.mjs";
 
 async function TheMotherScript() {
   console.log("Starting up The Mother Script...");
@@ -40,14 +40,13 @@ async function TheMotherScript() {
   }
 
   // try {
-  //   console.log("Initiating Sync process...");
-  //   await mainSync();
-  //   console.log("Sync process completed successfully.");
+  //   console.log("Initiating final touches process...");
+  //   await mainFinalTouches();
+  //   console.log("Final touches process completed successfully.");
   // } catch (error) {
-  //   console.error("Error in mainSync:", error);
+  //   console.error("Error in mainFinalTouches:", error);
   // }
-
-  console.log("The Mother Script has finished");
+  console.log("The Mother Script has completed successfully.");
 }
 
 // Call the main script

@@ -22,7 +22,7 @@ const WooCommerce = new WooCommerceRestApi.default({
   consumerKey: process.env.WC_CONSUMER_KEY,
   consumerSecret: process.env.WC_CONSUMER_SECRET,
   version: "wc/v3",
-  axiosConfig: { timeout: 100000 },
+  axiosConfig: { timeout: 500000 },
 });
 
 function handleError(error, message, options) {
@@ -277,6 +277,7 @@ const deleteProducts = async (deletedSKUs) => {
 
 console.log("Products deleted");
 
+//Main Method
 async function mainSync() {
   console.log("Connecting to Woo API");
   if (
@@ -291,7 +292,7 @@ async function mainSync() {
   }
 
   console.log("Successfully connected to Woo API.");
-  const convertedDirectoryPath = "./output/woo_rephrase";
+  const convertedDirectoryPath = "./output/final_touches";
   const latestCSV = await findLatestCSV(convertedDirectoryPath);
 
   if (!latestCSV) {
