@@ -11,28 +11,30 @@ async function createCategory(categoryName, parentCategoryId) {
     return categoryCache[categoryName];
   }
 
-  const newCategory = { name: categoryName, parent: parentCategoryId };
   try {
-    const response = await fetch(
-      `${process.env.WC_URL}/wp-json/wc/v3/products/categories`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${Buffer.from(
-            `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
-          ).toString("base64")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newCategory),
-      }
-    );
+    const response = await WooCommerce.get("products/categories", {
+      slug: categoryName.toLowerCase().replace(/\s+/g, "-"),
+    });
+    const existingCategory = response.data;
 
-    const data = await response.json();
-    categoryCache[categoryName] = data.id;
-    return data.id;
+    if (existingCategory && existingCategory.length > 0) {
+      categoryCache[categoryName] = existingCategory[0].id;
+      return existingCategory[0].id;
+    } else {
+      const newCategory = { name: categoryName, parent: parentCategoryId };
+
+      const response = await WooCommerce.post(
+        "products/categories",
+        newCategory
+      );
+      const data = response.data;
+
+      categoryCache[categoryName] = data.id;
+      return data.id;
+    }
   } catch (error) {
-    console.error("Error creating category:", error);
-    return null; // Handle as you see fit for your error management strategy
+    console.error("Error creating or finding category:", error);
+    return null; // Handle as needed
   }
 }
 
@@ -124,7 +126,6 @@ function mapProductBasics(row) {
   const tags = row.tags
     ? row.tags.split(",").map((tag) => ({ name: tag.trim() }))
     : [];
-
   const stockQuantity = parseInt(row.stock_quantity) || 0;
 
   return {
@@ -142,7 +143,7 @@ function mapProductBasics(row) {
     brand: row.brand,
     description: row.description || "",
     tags: tags,
-    meta_data: formatMetaData(row.meta_data || ""),
+    meta_data: formatMetaData(row.meta_data || ""), // Apply formatMetaData
     weight: row.weight || "0",
     manage_stock: true,
     backorders: "no",

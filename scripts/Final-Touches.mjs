@@ -93,30 +93,35 @@ async function mainFinalTouches() {
   const newFilePath = path.join(folderPath, "transformed.csv");
   const writeStream = fs.createWriteStream(newFilePath);
 
+  let productCount = 0;
+
   const readStream = fs
     .createReadStream(latestCSV)
     .pipe(csvParser({ delimiter: ",", columns: true }))
     .pipe(
       new Transform({
         objectMode: true,
-        transform: (row, encoding, callback) => {
-          const transformedRow = transformRow(row);
-          callback(null, transformedRow);
+        transform: async (row, encoding, callback) => {
+          if (productCount >= 500) {
+            // Stop processing further rows
+            writeStream.end();
+            callback(); // Signal completion without transforming
+            return;
+          }
+
+          try {
+            const transformedRow = await transformRow(row);
+            productCount++;
+            callback(null, transformedRow);
+          } catch (error) {
+            console.error("Error transforming row:", error);
+            callback(error);
+          }
         },
       })
     )
     .pipe(csvStringify({ header: true }))
     .pipe(writeStream);
-
-  let productCount = 0;
-  readStream.on("data", () => {
-    productCount++;
-    if (productCount === 500) {
-      readStream.unpipe();
-      writeStream.end();
-      console.log("Processing limit of 500 products reached.");
-    }
-  });
 
   readStream.on("error", (error) => {
     console.error("Error reading the CSV file:", error);
@@ -126,4 +131,5 @@ async function mainFinalTouches() {
     console.error("Error writing the CSV file:", error);
   });
 }
+
 mainFinalTouches();
