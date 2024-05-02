@@ -2,6 +2,7 @@ import { mainDownload } from "./Download.mjs";
 import { mainConversion } from "./Conversion.mjs";
 import { mainScraper } from "./Scraper.mjs";
 import { mainWooRephrase } from "./WooRephrase.mjs";
+//import { mainFinalFilter } from "./Final-Filter.mjs";
 //import { mainFinalTouches } from "./Final-Touches.mjs";
 
 async function TheMotherScript() {
@@ -39,13 +40,14 @@ async function TheMotherScript() {
     console.error("Error in mainWooRephrase:", error);
   }
 
-  try {
-    console.log("Initiating final Filter process...");
-    await mainFinalTouches();
-    console.log("Final filter process completed successfully.");
-  } catch (error) {
-    console.error("Error in mainFinalFilter:", error);
-  }
+  //   try {
+  //     console.log("Initiating final Filter process...");
+  //     await mainFinalFilter();
+  //     console.log("Final Filter process completed successfully.");
+  //   } catch (error) {
+  //     console.error("Error in mainFinalFilter:", error);
+  //   }
+  //   console.log("The Mother Script has completed successfully.");
 
   //   try {
   //     console.log("Initiating final touches process...");
@@ -57,5 +59,4 @@ async function TheMotherScript() {
   //   console.log("The Mother Script has completed successfully.");
 }
 
-// Call the main script
 TheMotherScript();

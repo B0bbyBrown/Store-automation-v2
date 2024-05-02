@@ -6,15 +6,18 @@ dotenv.config({ path: "./scripts/.env" });
 const categoryCache = {};
 
 // Create category
-async function createCategory(categoryName, parentCategoryId) {
+async function createCategory(categoryName, parentCategoryId, WooCommerce) {
+  console.log("Creating or finding category:", categoryName);
+
   if (categoryCache[categoryName]) {
+    console.log("Category found in cache.");
     return categoryCache[categoryName];
   }
 
   try {
-    const response = await WooCommerce.get("products/categories", {
-      slug: categoryName.toLowerCase().replace(/\s+/g, "-"),
-    });
+    const slug = categoryName.toLowerCase().replace(/\s+/g, "-");
+    console.log("Searching for category with slug:", slug);
+    const response = await WooCommerce.get("products/categories", { slug });
     const existingCategory = response.data;
 
     if (existingCategory && existingCategory.length > 0) {
@@ -22,7 +25,6 @@ async function createCategory(categoryName, parentCategoryId) {
       return existingCategory[0].id;
     } else {
       const newCategory = { name: categoryName, parent: parentCategoryId };
-
       const response = await WooCommerce.post(
         "products/categories",
         newCategory
@@ -34,7 +36,7 @@ async function createCategory(categoryName, parentCategoryId) {
     }
   } catch (error) {
     console.error("Error creating or finding category:", error);
-    return null; // Handle as needed
+    return null;
   }
 }
 
@@ -47,6 +49,7 @@ async function deleteUnusedCategories(usedCategories) {
         Authorization: `Basic ${Buffer.from(
           `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
         ).toString("base64")}`,
+        s,
       },
     }
   ).then((res) => res.json());
@@ -71,19 +74,19 @@ async function deleteUnusedCategories(usedCategories) {
 }
 
 // Map categories
-// Assumes category information is structured as [{id: "Category > Subcategory > Sub-subcategory"}, ...]
 async function mapCategories(categoryJson) {
-  const categories = JSON.parse(categoryJson);
-  let parentCategoryId = null;
+  const categories = JSON.parse(categoryJson); // Parse CSV data
 
+  let parentCategoryId = null;
   for (const category of categories) {
-    let categoryPath = category.id.split(" > ");
+    const categoryPath = category.id.split(" > ");
+
     for (let categoryName of categoryPath) {
-      parentCategoryId = await createCategory(categoryName, parentCategoryId);
+      parentCategoryId = await createCategory(categoryName, parentCategoryId); // Update to set parent
     }
   }
 
-  return parentCategoryId; // Return the ID of the last category in the hierarchy for product association
+  return parentCategoryId; // Return the final category ID for product association
 }
 
 //format metadata
@@ -151,10 +154,10 @@ function mapProductBasics(row) {
 }
 
 export {
-  deleteUnusedCategories,
-  mapProductBasics,
-  mapCategories,
   createCategory,
+  deleteUnusedCategories,
   formatMetaData,
   productFieldMapping,
+  mapCategories,
+  mapProductBasics,
 };

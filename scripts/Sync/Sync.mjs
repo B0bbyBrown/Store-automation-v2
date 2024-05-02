@@ -1,11 +1,19 @@
+import axios from "axios";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 import fs from "fs";
 import fsPromises from "fs/promises";
 import csv from "csv-parser";
-import axios from "axios";
 import dotenv from "dotenv";
 import { Transform } from "stream";
 import path from "path";
+
+const WooCommerce = new WooCommerceRestApi.default({
+  url: process.env.WC_URL,
+  consumerKey: process.env.WC_CONSUMER_KEY,
+  consumerSecret: process.env.WC_CONSUMER_SECRET,
+  version: "wc/v3",
+  axiosConfig: { timeout: 500000 },
+});
 
 import {
   mapProductBasics,
@@ -16,14 +24,6 @@ import {
 } from "./Mapping.mjs";
 
 dotenv.config({ path: "./scripts/.env" });
-
-const WooCommerce = new WooCommerceRestApi.default({
-  url: process.env.WC_URL,
-  consumerKey: process.env.WC_CONSUMER_KEY,
-  consumerSecret: process.env.WC_CONSUMER_SECRET,
-  version: "wc/v3",
-  axiosConfig: { timeout: 500000 },
-});
 
 function handleError(error, message, options) {
   console.error(`${message}:`, error);
@@ -84,8 +84,10 @@ async function parseCSV(csvFilePath) {
       .pipe(csv({ delimiter: ",", columns: true }))
       .pipe(
         asyncTransform(async (row) => {
-          const basicProduct = mapProductBasics(row);
-          return basicProduct;
+          const categories = await mapCategories(row.categories); // Process categories
+          const basicProduct = mapProductBasics(row); // Basic mapping
+
+          return { ...basicProduct, categories }; // Merge categories into the product object
         })
       )
       .on("data", (product) => products.push(product))
@@ -119,41 +121,59 @@ async function getWooCommerceProducts() {
 
 console.log("Products retrieved");
 
-//Find or Create Category
-let brandCategories = {};
-const findOrCreateCategory = async (brandName) => {
-  if (!brandName) {
-    console.error("Brand name is undefined or empty.");
-    return null;
-  }
+// //Find or Create Category
+// let brandCategories = {};
+// const findOrCreateCategory = async (brandName) => {
+//   if (!brandName) {
+//     console.error("Brand name is undefined or empty.");
+//     return null;
+//   }
 
-  const slug = brandName.toLowerCase().replace(/\s+/g, "-");
+//   const slug = brandName.toLowerCase().replace(/\s+/g, "-");
 
-  if (brandCategories[slug]) {
-    return brandCategories[slug];
-  }
+//   if (brandCategories[slug]) {
+//     return brandCategories[slug];
+//   }
 
+//   try {
+//     const response = await WooCommerce.get("products/categories", { slug });
+//     const existingCategory = response.data;
+
+//     if (existingCategory && existingCategory.length > 0) {
+//       brandCategories[slug] = existingCategory[0].id;
+//       return existingCategory[0].id;
+//     } else {
+//       const newCategoryResponse = await WooCommerce.post(
+//         "products/categories",
+//         {
+//           name: brandName,
+//           slug,
+//         }
+//       );
+//       const newCategory = newCategoryResponse.data;
+//       brandCategories[slug] = newCategory.id;
+//       return newCategory.id;
+//     }
+//   } catch (error) {
+//     console.error("Failed to find or create category:", error);
+//     throw error;
+//   }
+// };
+
+const setupCategories = async (categoryJson) => {
   try {
-    const response = await WooCommerce.get("products/categories", { slug });
-    const existingCategory = response.data;
+    // Map categories from the provided JSON (or CSV converted to JSON)
+    const usedCategoryIds = await mapCategories(categoryJson);
+    console.log(`All categories successfully mapped.`);
 
-    if (existingCategory && existingCategory.length > 0) {
-      brandCategories[slug] = existingCategory[0].id;
-      return existingCategory[0].id;
-    } else {
-      const newCategoryResponse = await WooCommerce.post(
-        "products/categories",
-        {
-          name: brandName,
-          slug,
-        }
-      );
-      const newCategory = newCategoryResponse.data;
-      brandCategories[slug] = newCategory.id;
-      return newCategory.id;
-    }
+    // Optionally, gather used categories for cleanup
+    const usedCategories = categoryJson.map((cat) => cat.id);
+
+    // Delete unused categories
+    await deleteUnusedCategories(usedCategoryIds);
+    console.log("Unused categories cleaned up successfully.");
   } catch (error) {
-    console.error("Failed to find or create category:", error);
+    console.error("Error during category setup:", error);
     throw error;
   }
 };
@@ -292,7 +312,7 @@ async function mainSync() {
   }
 
   console.log("Successfully connected to Woo API.");
-  const convertedDirectoryPath = "./output/final_touches";
+  const convertedDirectoryPath = "./output/final_filter";
   const latestCSV = await findLatestCSV(convertedDirectoryPath);
 
   if (!latestCSV) {
@@ -320,9 +340,6 @@ async function mainSync() {
     storeProducts
   );
 
-  // console.log(
-  //   `Synchronizing ${newProducts.length} new and ${updatedProducts.length} updated products.`
-  // );
   await uploadProducts(newProducts);
   await updateProducts(updatedProducts);
 

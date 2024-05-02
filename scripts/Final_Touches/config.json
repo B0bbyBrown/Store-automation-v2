@@ -1,0 +1,8 @@
+{
+  "type": "json",
+  "keywords": ["auger drill bit", "metal cleaning"],
+  "directories": {
+    "input": "./output/final_touches/",
+    "output": "./output/"
+  }
+}
