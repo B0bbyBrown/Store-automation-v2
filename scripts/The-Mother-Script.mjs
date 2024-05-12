@@ -1,9 +1,7 @@
-import { mainDownload } from "./Download.mjs";
-import { mainConversion } from "./Conversion.mjs";
-import { mainScraper } from "./Scraper.mjs";
-import { mainWooRephrase } from "./WooRephrase.mjs";
-//import { mainFinalFilter } from "./Final-Filter.mjs";
-//import { mainFinalTouches } from "./Final-Touches.mjs";
+import { mainDownload } from "./CSV-Manipulation/Download.mjs";
+import { mainConversion } from "./CSV-Manipulation/Conversion.mjs";
+import { mainScraper } from "./CSV-Manipulation/Scraper.mjs";
+import { mainWooRephrase } from "./CSV-Manipulation/WooRephrase.mjs";
 
 async function TheMotherScript() {
   console.log("Starting up The Mother Script...");
@@ -39,24 +37,6 @@ async function TheMotherScript() {
   } catch (error) {
     console.error("Error in mainWooRephrase:", error);
   }
-
-  //   try {
-  //     console.log("Initiating final Filter process...");
-  //     await mainFinalFilter();
-  //     console.log("Final Filter process completed successfully.");
-  //   } catch (error) {
-  //     console.error("Error in mainFinalFilter:", error);
-  //   }
-  //   console.log("The Mother Script has completed successfully.");
-
-  //   try {
-  //     console.log("Initiating final touches process...");
-  //     await mainFinalTouches();
-  //     console.log("Final touches process completed successfully.");
-  //   } catch (error) {
-  //     console.error("Error in mainFinalTouches:", error);
-  //   }
-  //   console.log("The Mother Script has completed successfully.");
 }
 
 TheMotherScript();

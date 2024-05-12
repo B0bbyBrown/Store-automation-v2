@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import { Transform } from "stream";
 import path from "path";
 
+dotenv.config({ path: "./scripts/.env" });
+
 const WooCommerce = new WooCommerceRestApi.default({
   url: process.env.WC_URL,
   consumerKey: process.env.WC_CONSUMER_KEY,
@@ -18,12 +20,8 @@ const WooCommerce = new WooCommerceRestApi.default({
 import {
   mapProductBasics,
   mapCategories,
-  createCategory,
-  formatMetaData,
   productFieldMapping,
-} from "./Mapping.mjs";
-
-dotenv.config({ path: "./scripts/.env" });
+} from "./scripts/Sync/Modules/MappingModules/CategoryMapping.mjs";
 
 function handleError(error, message, options) {
   console.error(`${message}:`, error);
@@ -121,45 +119,6 @@ async function getWooCommerceProducts() {
 
 console.log("Products retrieved");
 
-// //Find or Create Category
-// let brandCategories = {};
-// const findOrCreateCategory = async (brandName) => {
-//   if (!brandName) {
-//     console.error("Brand name is undefined or empty.");
-//     return null;
-//   }
-
-//   const slug = brandName.toLowerCase().replace(/\s+/g, "-");
-
-//   if (brandCategories[slug]) {
-//     return brandCategories[slug];
-//   }
-
-//   try {
-//     const response = await WooCommerce.get("products/categories", { slug });
-//     const existingCategory = response.data;
-
-//     if (existingCategory && existingCategory.length > 0) {
-//       brandCategories[slug] = existingCategory[0].id;
-//       return existingCategory[0].id;
-//     } else {
-//       const newCategoryResponse = await WooCommerce.post(
-//         "products/categories",
-//         {
-//           name: brandName,
-//           slug,
-//         }
-//       );
-//       const newCategory = newCategoryResponse.data;
-//       brandCategories[slug] = newCategory.id;
-//       return newCategory.id;
-//     }
-//   } catch (error) {
-//     console.error("Failed to find or create category:", error);
-//     throw error;
-//   }
-// };
-
 const setupCategories = async (categoryJson) => {
   try {
     // Map categories from the provided JSON (or CSV converted to JSON)
@@ -169,7 +128,6 @@ const setupCategories = async (categoryJson) => {
     // Optionally, gather used categories for cleanup
     const usedCategories = categoryJson.map((cat) => cat.id);
 
-    // Delete unused categories
     await deleteUnusedCategories(usedCategoryIds);
     console.log("Unused categories cleaned up successfully.");
   } catch (error) {
@@ -179,6 +137,7 @@ const setupCategories = async (categoryJson) => {
 };
 
 console.log("Comparing Products to CSV");
+
 //Compare Products
 const compareProducts = async (csvProducts, storeProducts) => {
   const newProducts = [];
@@ -297,7 +256,7 @@ const deleteProducts = async (deletedSKUs) => {
 
 console.log("Products deleted");
 
-//Main Method
+// Main Method
 async function mainSync() {
   console.log("Connecting to Woo API");
   if (
@@ -312,40 +271,48 @@ async function mainSync() {
   }
 
   console.log("Successfully connected to Woo API.");
-  const convertedDirectoryPath = "./output/final_filter";
-  const latestCSV = await findLatestCSV(convertedDirectoryPath);
 
-  if (!latestCSV) {
-    console.error("No CSV file found.");
-    return;
+  try {
+    const convertedDirectoryPath = "./output/final_filter";
+    const latestCSV = await findLatestCSV(convertedDirectoryPath);
+    if (!latestCSV) {
+      console.error("No CSV file found.");
+      return;
+    }
+
+    const csvProducts = await parseCSV(latestCSV);
+    if (!csvProducts.length) {
+      console.error("No products found in CSV.");
+      return;
+    }
+
+    // Assuming you need to setup categories based on your CSV before uploading products
+    await setupCategories(csvProducts);
+
+    const storeProducts = await getWooCommerceProducts();
+    if (!storeProducts) {
+      console.error("Failed to fetch store products.");
+      return;
+    }
+
+    console.log(
+      `CSV file successfully processed with ${csvProducts.length} products.`
+    );
+    const { newProducts, updatedProducts } = await compareProducts(
+      csvProducts,
+      storeProducts
+    );
+
+    await uploadProducts(newProducts);
+    await updateProducts(updatedProducts);
+
+    console.log("Product synchronization completed successfully.");
+  } catch (error) {
+    console.error(
+      "An error occurred during the synchronization process:",
+      error
+    );
   }
-
-  const csvProducts = await parseCSV(latestCSV);
-  if (!csvProducts.length) {
-    console.error("No products found in CSV.");
-    return;
-  }
-
-  const storeProducts = await getWooCommerceProducts();
-  if (!storeProducts) {
-    console.error("Failed to fetch store products.");
-    return;
-  }
-
-  console.log(
-    `CSV file successfully processed with ${csvProducts.length} products.`
-  );
-  const { newProducts, updatedProducts } = await compareProducts(
-    csvProducts,
-    storeProducts
-  );
-
-  await uploadProducts(newProducts);
-  await updateProducts(updatedProducts);
-
-  console.log("Product synchronization completed successfully.");
 }
 
 mainSync();
-
-console.log("All Done!");

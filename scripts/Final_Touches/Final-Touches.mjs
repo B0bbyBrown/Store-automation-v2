@@ -60,7 +60,7 @@ function cleanUp(row) {
 function transformCategoryHierarchy(hierarchy) {
   return hierarchy
     .split(" > ")
-    .map((categoryName) => ({ id: categoryName.trim() }));
+    .map((categoryName) => ({ name: categoryName.trim() }));
 }
 
 // Adjust price by 10%
