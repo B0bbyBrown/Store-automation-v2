@@ -1,0 +1,34 @@
+
+├── .vscode/
+├── node_modules/
+├── output/
+├── Script-Info/
+├── scripts/
+│   ├── .env
+│   ├── The-Mother-Script.mjs
+│   │
+│   ├── CSV-Manipulation/
+│   │   ├── Conversion.mjs
+│   │   ├── Download.mjs
+│   │   ├── Scraper.mjs
+│   │   └── WooRephrase.mjs
+│   │
+│   ├── Final_Touches/
+│   │   ├── Modules/
+│   │   │   ├── configManager.mjs
+│   │   │   ├── csvHandler.mjs
+│   │   │   └── logger.mjs
+│   │   ├── config.json
+│   │   ├── Final-Filter.mjs
+│   │   └── Final-Touches.mjs
+│   │
+│   └── Sync/
+│       ├── Modules/
+│       │   ├── MappingModules/
+│       │   │   ├── CategoryMapping.mjs
+│       │   │   └── ProductMapping.mjs
+│       │   └── SyncModules/
+│       │       └── SyncComponents.mjs
+│       └── Sync.mjs
+│
+└── .gitignore

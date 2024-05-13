@@ -132,4 +132,4 @@ async function mainFinalTouches() {
   });
 }
 
-mainFinalTouches();
+export { mainFinalTouches };

@@ -6,7 +6,7 @@ import {
   saveFilteredProducts,
 } from "./Modules/csvHandler.mjs";
 
-async function main() {
+async function mainFinalFilter() {
   const logger = createLogger();
 
   const config = loadConfig();
@@ -60,4 +60,4 @@ function generateFolderPath() {
   return `final_filter/${year}/${month}/${day}/${hour}/${minute}`;
 }
 
-main();
+export { mainFinalFilter };
