@@ -1,0 +1,40 @@
+Final-Filter.mjs is responsible for filtering products in a CSV file based 
+on specific keywords and saving the filtered products to a new CSV file. 
+
+Here’s a detailed breakdown of its functionality:
+
+
+/Imports: The script imports necessary modules:
+
+-loadConfig from configManager.mjs for loading configuration settings.
+-createLogger from logger.mjs for creating a logger instance.
+-findLatestCSV, filterProductsByKeywords, and saveFilteredProducts from csvHandler.mjs for CSV operations.
+
+
+/Main Method (mainFinalFilter()):
+
+-Variables:
+ -logger: Logger instance for logging information and errors.
+ -config: Configuration settings loaded from configManager.mjs.
+ -keywords: Keywords for filtering products, retrieved from the configuration.
+ -outputDirectory: Output directory for saving the filtered products, retrieved from the configuration.
+ -convertedDirectoryPath: Path to the directory containing the converted CSV files (./output/final_touches/).
+
+
+/Steps:
+-Finds the latest CSV file in the converted directory.
+-Logs an error if no CSV file is found and exits the function.
+-Logs the path to the latest CSV file found.
+-Filters products in the CSV file by the specified keywords using filterProductsByKeywords.
+-Logs the number of products matching and not matching the keywords.
+-If there are matching products:
+ -Generates a dynamic folder path for the output file using generateFolderPath.
+ -Constructs the output path for the filtered CSV file.
+ -Saves the filtered products to the output path using saveFilteredProducts.
+ -Logs success if the filtered products are saved successfully.
+-Logs errors if any occur during the process.
+
+
+Helper Function (generateFolderPath()):
+
+-Generates a folder path based on the current date and time, formatted as final_filter/YY/MM/DD/HH/mm.

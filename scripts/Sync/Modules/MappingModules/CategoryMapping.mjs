@@ -23,28 +23,35 @@ function isValidCategory(category) {
 
 // Map categories
 async function mapCategories(categoriesJson) {
+  console.log("Received categories:", categoriesJson); // Debug statement
+  console.log("Type of categoriesJson:", typeof categoriesJson); // Debug type
   if (!categoriesJson) {
     console.error("No categories JSON provided");
     return [];
   }
 
+  let categories;
   try {
-    const categories = JSON.parse(categoriesJson);
+    categories =
+      typeof categoriesJson === "string"
+        ? JSON.parse(categoriesJson)
+        : categoriesJson;
+
     if (!Array.isArray(categories) || categories.length === 0) {
       console.warn("Categories JSON is empty or not an array");
       return [];
     }
-
-    return categories
-      .filter(isValidCategory) // Validate category
-      .map((cat) => ({
-        name: cat.name,
-        slug: transformCategoryNameToSlug(cat.name),
-      }));
   } catch (error) {
     console.error("Failed to parse categories JSON", error);
     return [];
   }
+
+  return categories
+    .filter(isValidCategory) // Validate category
+    .map((cat) => ({
+      name: cat.name,
+      slug: transformCategoryNameToSlug(cat.name),
+    }));
 }
 
 // Create or find category
@@ -52,20 +59,19 @@ async function createCategory(categoryData) {
   console.log("Creating or finding category:", categoryData.name);
 
   try {
-    // Check if the category already exists
     const response = await WooCommerce.get("products/categories", {
       search: categoryData.name,
     });
 
     if (response.data && response.data.length > 0) {
-      return response.data[0].id; // Return existing category ID
+      return response.data[0].name;
     } else {
       // Create new category if not found
       const newCategory = await WooCommerce.post(
         "products/categories",
         categoryData
       );
-      return newCategory.data.id; // Return new category ID
+      return newCategory.data.name;
     }
   } catch (error) {
     console.error("Error creating or finding category:", error);
@@ -74,15 +80,15 @@ async function createCategory(categoryData) {
 }
 
 // Delete unused categories
-async function deleteUnusedCategories(usedCategoryIds) {
+async function deleteUnusedCategories(usedCategoryNames) {
   try {
     const allCategories = await WooCommerce.get("products/categories");
     const categoriesToDelete = allCategories.data.filter(
-      (cat) => !usedCategoryIds.includes(cat.id)
+      (cat) => !usedCategoryNames.includes(cat.name)
     );
 
     for (const category of categoriesToDelete) {
-      await WooCommerce.delete(`products/categories/${category.id}`, {
+      await WooCommerce.delete(`products/categories/${category.name}`, {
         force: true, // Ensures the category is permanently deleted
       });
       console.log(`Deleted category: ${category.name}`);
@@ -95,17 +101,17 @@ async function deleteUnusedCategories(usedCategoryIds) {
 const setupCategories = async (categoryJson) => {
   try {
     const mappedCategories = await mapCategories(categoryJson);
-    const categoryIds = [];
+    const categoryNames = [];
 
     for (let categoryData of mappedCategories) {
-      const categoryId = await createCategory(categoryData);
-      if (categoryId) {
-        categoryIds.push(categoryId);
+      const categoryNames = await createCategory(categoryData);
+      if (categoryNames) {
+        categoryNames.push(categoryNames);
       }
     }
 
     console.log("All categories successfully mapped and created or found.");
-    await deleteUnusedCategories(categoryIds);
+    await deleteUnusedCategories(categoryNames);
     console.log("Unused categories cleaned up successfully.");
   } catch (error) {
     console.error("Error during category setup:", error);

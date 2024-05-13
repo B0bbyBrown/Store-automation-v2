@@ -1,0 +1,31 @@
+/Imports: The script imports necessary modules:
+
+-path for handling file paths.
+-fsPromises from fs for file system operations using promises.
+
+/Helper Functions:
+
+-generateFolderPath(): 
+ -Generates a folder path based on the current date and time, formatted as YY/MM/DD/HH/mm.
+-findLatestCSV(convertedDirectoryPath): 
+ -Finds the latest CSV file in a directory and its subdirectories based on the modification time.
+-filterData(csvData): 
+ -Filters data based on the manufacturer column, keeping only rows where the manufacturer is "TORK CRAFT".
+-saveToCSV(filteredData, outputRootDirectory): 
+ -Saves the filtered data to a new CSV file in a dynamically generated folder within the specified output directory.
+
+
+/Main Method (mainScraper()):
+
+/Variables:
+-convertedDirectoryPath: 
+ -The path to the directory containing the converted CSV files (./output/converted).
+-outputRootDirectory: 
+ -The root directory where the filtered data will be saved (./output/filtered_data).
+
+/Steps:
+-Finds the latest CSV file in the converted directory.
+-Reads the latest CSV file and parses it into a 2D array (csvData).
+-Filters the data to include only rows where the manufacturer is "TORK CRAFT".
+-Saves the filtered data to a new CSV file in the specified output directory.
+-Logs the path to the saved filtered data or logs errors if any occur during the process.

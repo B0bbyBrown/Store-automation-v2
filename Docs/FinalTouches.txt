@@ -1,0 +1,49 @@
+Final-Touches.mjs is responsible for applying the final transformations 
+to the CSV data before it’s ready for synchronization. 
+
+
+Here’s a detailed breakdown of its functionality:
+
+
+/Imports: The script imports necessary modules:
+
+-fs for file system operations.
+-path for handling file paths.
+-csv-parser for parsing CSV files.
+-stream and Transform for stream transformations.
+-csv-stringify for writing CSV files.
+
+
+/Helper Functions:
+
+-findLatestCSV(directoryPath): 
+ -Finds the latest CSV file in a directory and its subdirectories based on the modification time.
+-generateFolderPath(): 
+ -Generates a folder path based on the current date and time, formatted as YY/MM/DD/HH/mm. Ensures the directory structure exists.
+-cleanUp(row): 
+ -Cleans up and removes specific columns from the row data (is_essential, is_accessory, is_spare, minimum_allowed_quantity, date_expected, erp_status).
+-transformCategoryHierarchy(hierarchy): 
+ -Transforms the category hierarchy string into an array of category objects, splitting by >.
+-adjustPrice(price): 
+ -Adjusts the price by adding 10% and returns the new price formatted to two decimal places.
+-transformRow(row): 
+ -Transforms each row synchronously by adjusting the price and transforming the category hierarchy. Cleans up the row by removing specific columns.
+
+
+/Main Method (mainFinalTouches()):
+
+-Variables:
+ -latestCSV: The latest CSV file in the ./output/woo_rephrase/ directory.
+ -folderPath: The dynamically generated folder path for the output file.
+ -newFilePath: The path to the new transformed CSV file within the generated folder.
+ -writeStream: Stream for writing the transformed CSV data to the output file.
+
+-Steps:
+ -Finds the latest CSV file in the rephrased data directory.
+ -Logs an error if no CSV file is found and exits the function.
+ -Logs the path to the latest CSV file found.
+ -Sets up a dynamic folder path based on the current date and time.
+ -Constructs the output path for the transformed CSV file.
+ -Reads the latest CSV file, applies transformations to each row, and writes the transformed data to the output file.
+ -Stops processing further rows if the product count reaches 500.
+ -Logs errors if any occur during the reading or writing process.

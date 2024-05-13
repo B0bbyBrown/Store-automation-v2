@@ -1,0 +1,41 @@
+Conversion.mjs is responsible for processing an HTML-formatted CSV file and converting it into a standard CSV format. 
+
+Here’s a detailed breakdown of its functionality:
+
+
+/Imports: The script imports necessary modules:
+
+-fs for file system operations.
+-path for handling file paths.
+-fast-csv for parsing and writing CSV files.
+-cheerio for manipulating and stripping HTML tags from text.
+
+/Assisting Functions:
+
+-containsHtmlTags(text): 
+ -Checks if a string contains HTML tags using cheerio.
+-stripHtmlTags(html): 
+ -Strips HTML tags from a string and trims whitespace using cheerio.
+-ensureDirectoryExistence(filePath): 
+ -Ensures the directory for the given file path exists, creating it if necessary.
+-generateFolderPath(): 
+ -Generates a folder path based on the current date and time, formatted as YY/MM/DD/HH/mm.
+-findLatestCSV(directoryPath): 
+ -Finds the latest CSV file in a directory and its subdirectories based on the modification time.
+
+
+/Main Function (processHtmlCsv()):
+
+-Reads the input CSV file.
+-Strips HTML tags from the description field and trims whitespace.
+-Trims whitespace from all fields.
+-Writes the processed data to the output CSV file.
+
+
+/Main Method (mainConversion()):
+
+-Finds the latest CSV file in the ./output directory.
+-Generates a dynamic folder path based on the current date and time.
+-Sets up the output CSV file path using the generated folder path.
+-Calls processHtmlCsv() to convert and save the HTML-formatted CSV file.
+-Logs errors if any occur during the process.

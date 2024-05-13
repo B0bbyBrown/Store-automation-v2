@@ -1,0 +1,47 @@
+WooRephrase.mjs is responsible for updating the headers of a CSV file 
+to match a predefined mapping and saving the rephrased data to a new CSV file. 
+
+Here’s a detailed breakdown of its functionality:
+
+/Imports: The script imports necessary modules:
+
+-fs for file system operations.
+-path for handling file paths.
+-fast-csv for parsing and writing CSV files.
+
+
+/Constants:
+
+-headerMapping: 
+ -Defines the mapping between old headers and new headers for the CSV file.
+
+
+/Helper Functions:
+
+-updateHeaders(data): 
+ -Updates the headers in the CSV data based on the headerMapping.
+-findLatestCSV(directoryPath): 
+ -Finds the latest CSV file in a directory and its subdirectories based on the modification time.
+-generateFolderPath(): 
+ -Generates a folder path based on the current date and time, formatted as YY/MM/DD/HH/mm. Ensures the directory structure exists.
+
+
+/Main Function (rephraseCSVHeaders(inputCsvPath, outputCsvPath)):
+
+-Reads the input CSV file.
+-Updates the headers for each row using updateHeaders().
+-Writes the processed data with updated headers to the output CSV file.
+
+
+/Main Method (mainWooRephrase()):
+
+-Variables:
+ -latestInputFile: The latest CSV file in the ./output/filtered_data/ directory.
+ -folderPath: The dynamically generated folder path for the output file.
+ -outputCsvPath: The path to the output CSV file within the generated folder.
+-Steps:
+ -Finds the latest CSV file in the filtered data directory.
+ -Sets up a dynamic folder path based on the current date and time.
+ -Sets up the output CSV file path.
+ -Calls rephraseCSVHeaders() to rephrase the headers of the CSV file and save it to the output path.
+ -Logs errors if any occur during the process.

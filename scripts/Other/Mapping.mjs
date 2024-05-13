@@ -5,37 +5,6 @@
 
 // const categoryCache = {};
 
-// //format metadata
-// function formatMetaData(metaDataString) {
-//   const metaData = [];
-//   const entries = metaDataString.split(";");
-//   entries.forEach((entry) => {
-//     const [key, value] = entry.split(":");
-//     if (key && value) {
-//       metaData.push({ key: key.trim(), value: value.trim() });
-//     }
-//   });
-//   return metaData;
-// }
-
-// const productFieldMapping = {
-//   sku: "sku",
-//   name: "name",
-//   images: "images",
-//   permalink: "permalink",
-//   dimensions_length: "dimensions.length",
-//   dimensions_width: "dimensions.width",
-//   dimensions_height: "dimensions.height",
-//   stock_quantity: "stock_quantity",
-//   regular_price: "regular_price",
-//   brand: "brand",
-//   description: "description",
-//   tags: "tags",
-//   meta_data: "meta_data",
-//   weight: "weight",
-//   // Add other mappings as necessary
-// };
-
 // //Find or Create Category
 // const createOrRetrieveCategory = async (
 //   categoryName,

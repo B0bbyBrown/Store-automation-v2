@@ -1,4 +1,6 @@
-import { config } from "../config.mjs";
+import config from "../MappingModules/config.json" assert { type: "json" };
+const brand = config.defaultBrand;
+const allowBackorders = config.allowBackorders;
 
 // Validate Product Data
 function validateProductData(product) {
@@ -21,39 +23,35 @@ function parseCsvValue(input, delimiter) {
 
 // Map Products
 function mapProductBasics(row) {
-  const validatedRow = validateProductData(row); // Ensure data is valid
-  if (!validatedRow) {
+  if (!validateProductData(row)) {
     console.error("Invalid product data:", row);
     return null;
   }
 
-  // Correct function name used here
   const images = parseCsvValue(row.images, ";").map((image) => ({
     src: image,
   }));
-  const tags = parseCsvValue(row.tags, ",").map((tag) => ({
-    name: tag,
-  }));
+  const tags = parseCsvValue(row.tags, ",").map((tag) => ({ name: tag }));
 
   return {
-    sku: validatedRow.sku,
-    name: validatedRow.name,
+    sku: row.sku,
+    name: row.name,
     images,
-    permalink: validatedRow.permalink,
+    permalink: row.permalink,
     dimensions: {
-      length: validatedRow.dimensions_length,
-      width: validatedRow.dimensions_width,
-      height: validatedRow.dimensions_height,
+      length: row.dimensions_length,
+      width: row.dimensions_width,
+      height: row.dimensions_height,
     },
-    stock_quantity: parseInt(validatedRow.stock_quantity) || 0,
-    regular_price: validatedRow.regular_price,
-    brand: row.brand,
-    description: validatedRow.description || "",
+    stock_quantity: parseInt(row.stock_quantity) || 0,
+    regular_price: row.regular_price,
+    brand: row.brand || config.defaultBrand, // Now using config directly
+    description: row.description || "",
     tags,
-    meta_data: formatMetaData(validatedRow.meta_data),
-    weight: validatedRow.weight || "0",
+    meta_data: row.meta_data,
+    weight: row.weight || "0",
     manage_stock: true,
-    backorders: config.allowBackorders ? "yes" : "no",
+    backorders: config.allowBackorders ? "yes" : "no", // Correct usage of config
   };
 }
 

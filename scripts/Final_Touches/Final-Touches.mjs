@@ -1,4 +1,3 @@
-// Imports using ECMAScript Modules syntax
 import fs from "fs";
 import path from "path";
 import csvParser from "csv-parser";
@@ -53,6 +52,7 @@ function cleanUp(row) {
   delete row.is_spare;
   delete row.minimum_allowed_quantity;
   delete row.date_expected;
+  delete row.erp_status;
   return row;
 }
 

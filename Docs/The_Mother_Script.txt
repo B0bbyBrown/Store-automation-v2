@@ -1,0 +1,53 @@
+The-Mother-Script.mjs serves as the main entry point for your entire script. 
+It coordinates various processes by sequentially calling several main functions from different modules.
+
+Here’s a detailed breakdown of its functionality:
+
+
+/Imports: The script imports main functions from other modules responsible for specific tasks.
+
+-mainDownload from Download.mjs
+-mainConversion from Conversion.mjs
+-mainScraper from Scraper.mjs
+-mainWooRephrase from WooRephrase.mjs
+-mainFinalFilter from Final-Filter.mjs
+-mainFinalTouches from Final-Touches.mjs
+-There is also a commented-out import for mainSync from WooUpdate.mjs, suggesting it might be used later.
+ 
+ 
+/Function Execution: The script defines an asynchronous function TheMotherScript which:
+
+-Logs the start of the script.
+
+-Download & Unzip:
+ -Calls mainDownload.
+ -Logs success or catches and logs errors.
+
+-Conversion:
+ -Calls mainConversion.
+ -Logs success or catches and logs errors.
+
+-Scraping:
+ -Calls mainScraper.
+ -Logs success or catches and logs errors.
+
+-Rephrasing:
+ -Calls mainWooRephrase.
+ -Logs success or catches and logs errors.
+
+-Delay:
+ -Introduces a 15-second delay to ensure the rephrasing process is completed.
+
+-Final Touches:
+ -Calls mainFinalTouches.
+ -Logs success or catches and logs errors.
+
+-Final Filter:
+ -Calls mainFinalFilter.
+ -Logs success or catches and logs errors.
+
+-Synchronization (commented out):
+ -Calls mainSync.
+ -Logs success or catches and logs errors.
+
+-Script Execution: Finally, the script calls TheMotherScript to start the execution.
