@@ -1,0 +1,55 @@
+ProductMapping.mjs is responsible for validating and mapping product 
+data from CSV rows to the WooCommerce product format. 
+
+Here’s a detailed breakdown of its functionality:
+
+
+/Imports and Configuration:
+
+-Imports configuration settings from config.json (e.g., defaultBrand, allowBackorders).
+
+
+/Helper Functions:
+
+-validateProductData(product): -Validates product data to ensure required fields (sku, name, images, regular_price) are present.
+-parseCsvValue(input, delimiter): -Parses a delimited string into an array of trimmed values.
+-mapProductBasics(row): -Maps a CSV row to a WooCommerce product format. Validates data, parses images and tags, and applies default values from the configuration.
+
+
+/Function Details
+
+-transformCategoryNameToSlug(categoryName):
+ -Converts the category name to lowercase.
+ -Replaces & with and.
+ -Replaces spaces, non-word characters, and multiple dashes with a single dash.
+
+-isValidCategory(category):
+ -Checks if the category object has a non-empty name property.
+
+-mapCategories(categoriesJson):
+ -Parses the input JSON to an array of category objects.
+ -Validates each category and transforms names to slugs.
+ -Handles parsing errors and empty arrays.
+
+
+-createCategory(categoryData):
+ -Searches for the category in WooCommerce by name.
+ -Creates a new category if it does not exist.
+ -Returns the name of the category.
+
+-deleteUnusedCategories(usedCategoryNames):
+ -Fetches all categories from WooCommerce.
+ -Deletes categories that are not in the usedCategoryNames list.
+ -Uses the force: true option to permanently delete categories.
+
+-validateProductData(product):
+ -Checks if required fields (sku, name, images, regular_price) are present in the product data.
+
+-parseCsvValue(input, delimiter):
+ -Splits the input string by the specified delimiter and trims whitespace from each value.
+
+-mapProductBasics(row):
+ -Validates the CSV row data.
+ -Parses images and tags from delimited strings.
+ -Maps CSV fields to WooCommerce product fields.
+ -Applies default values for brand and backorders from the configuration.

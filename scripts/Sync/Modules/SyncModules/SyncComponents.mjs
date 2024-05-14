@@ -5,13 +5,11 @@ import path from "path";
 import fsPromises from "fs/promises";
 import WooCommerceAPI from "../../Api/apiConfig.mjs";
 import { Transform } from "stream";
-//import { setupCategories } from "./CategoryMapping.mjs";
 import { handleAPIError } from "../../Utils/errorHandling.mjs";
-import { mapCategories } from "../MappingModules/CategoryMapping.mjs";
 import { mapProductBasics } from "../../Modules/MappingModules/ProductMapping.mjs";
 import WooCommerce from "../../Api/apiConfig.mjs";
 
-// Mapping of CSV fields to WooCommerce fields
+// Define asyncTransform
 function asyncTransform(operation) {
   return new Transform({
     objectMode: true,
@@ -26,6 +24,17 @@ function asyncTransform(operation) {
       }
     },
   });
+}
+
+// Fetch all categories from WooCommerce
+async function getWooCommerceCategories() {
+  try {
+    const response = await WooCommerce.get("products/categories");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching WooCommerce categories:", error);
+    throw error;
+  }
 }
 
 // Find latest CSV file
@@ -52,15 +61,31 @@ async function findLatestCSV(directoryPath) {
   return latestFile;
 }
 
-// Parse CSV file
-async function parseCSV(filePath) {
+// Parse CSV file and map categories to WooCommerce categories
+async function parseCSV(filePath, wooCategories) {
   const products = [];
   return new Promise((resolve, reject) => {
     fs.createReadStream(filePath)
       .pipe(csv({ delimiter: ",", columns: true }))
       .pipe(
         asyncTransform(async (row) => {
-          const categories = await mapCategories(row.categories);
+          // Map categories from CSV to WooCommerce categories
+          const categories = row.categories
+            ? JSON.parse(row.categories)
+                .map((cat) => {
+                  const wooCategory = wooCategories.find(
+                    (wc) => wc.name.toLowerCase() === cat.name.toLowerCase()
+                  );
+                  if (wooCategory) {
+                    return { id: wooCategory.id };
+                  } else {
+                    console.error(`No match found for category: ${cat.name}`);
+                    return null;
+                  }
+                })
+                .filter(Boolean)
+            : [];
+
           const basicProduct = mapProductBasics(row);
           return { ...basicProduct, categories };
         })
@@ -88,8 +113,13 @@ async function getWooCommerceProducts() {
   }
 }
 
+// Define product field mapping
+const productFieldMapping = {
+  // Add specific field mappings if necessary
+};
+
 // Compare Products
-const compareProducts = async (csvProducts, storeProducts) => {
+const compareProducts = (csvProducts, storeProducts) => {
   const newProducts = [];
   const updatedProducts = [];
   const existingSKUs = new Set(storeProducts.map((product) => product.sku));
@@ -117,15 +147,14 @@ const compareProducts = async (csvProducts, storeProducts) => {
             updateData[wooCommerceField] = csvProduct[field];
           }
         }
-        await WooCommerce.put(`products/${storeProduct.id}`, updateData);
-        updatedProducts.push(storeProduct);
+        updatedProducts.push({ id: storeProduct.id, ...updateData });
       }
     } else {
       newProducts.push(csvProduct);
     }
   }
 
-  return { newProducts, updatedProducts };
+  return { newProducts, updatedProducts, productsToDelete: [] };
 };
 
 // Upload Products
@@ -133,43 +162,31 @@ const uploadProducts = async (newProducts) => {
   const batchSize = 100;
   for (let i = 0; i < newProducts.length; i += batchSize) {
     const batch = newProducts.slice(i, i + batchSize);
+    console.log("Uploading products batch:", JSON.stringify(batch, null, 2));
     try {
-      const response = await WooCommerce.post("products/batch", {
-        create: batch,
-      });
+      await WooCommerce.post("products/batch", { create: batch });
     } catch (error) {
-      handleError(error, "Error uploading products", {
-        name: "uploadProducts",
-        canRetry: true,
-        retryCount: 0,
-        callback: () => uploadProducts(batch),
-      });
+      console.error("Error uploading products:", error);
     }
   }
 };
 
-// Update products
+// Update Products
 const updateProducts = async (updatedProducts) => {
   const batchSize = 100;
   for (let i = 0; i < updatedProducts.length; i += batchSize) {
     const batch = updatedProducts.slice(i, i + batchSize);
+    console.log("Updating products batch:", JSON.stringify(batch, null, 2));
     try {
-      const response = await WooCommerce.post("products/batch", {
-        update: batch,
-      });
+      await WooCommerce.post("products/batch", { update: batch });
     } catch (error) {
-      handleError(error, "Error updating products", {
-        name: "updateProducts",
-        canRetry: true,
-        retryCount: 0,
-        callback: () => updateProducts(batch),
-      });
+      console.error("Error updating products:", error);
     }
   }
 };
 
-// Delete products
-const deleteProducts = async (deletedSKUs) => {
+// Delete Products
+const deleteProducts = async (deletedSKUs, storeProducts) => {
   const productsToDelete = storeProducts.filter((product) =>
     deletedSKUs.includes(product.sku)
   );
@@ -179,18 +196,13 @@ const deleteProducts = async (deletedSKUs) => {
       .slice(i, i + batchSize)
       .map((product) => product.id);
     try {
-      const response = await WooCommerce.delete("products/batch", {
+      await WooCommerce.delete("products/batch", {
         delete: batch,
         force: true,
       });
       console.log(`Deleted ${batch.length} product(s).`);
     } catch (error) {
-      handleError(error, "Error deleting products", {
-        name: "deleteProducts",
-        canRetry: true,
-        retryCount: 0,
-        callback: () => deleteProducts(batch),
-      });
+      console.error("Error deleting products:", error);
     }
   }
 };
@@ -200,6 +212,7 @@ export {
   findLatestCSV,
   parseCSV,
   getWooCommerceProducts,
+  getWooCommerceCategories,
   compareProducts,
   uploadProducts,
   updateProducts,

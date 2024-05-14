@@ -12,7 +12,6 @@ function validateProductData(product) {
       isValid = false;
     }
   }
-
   return isValid;
 }
 
@@ -45,13 +44,13 @@ function mapProductBasics(row) {
     },
     stock_quantity: parseInt(row.stock_quantity) || 0,
     regular_price: row.regular_price,
-    brand: row.brand || config.defaultBrand, // Now using config directly
+    brand: row.brand || config.defaultBrand,
     description: row.description || "",
-    tags,
+    tags, // Ensure tags are included
     meta_data: row.meta_data,
     weight: row.weight || "0",
     manage_stock: true,
-    backorders: config.allowBackorders ? "yes" : "no", // Correct usage of config
+    backorders: config.allowBackorders ? "yes" : "no",
   };
 }
 

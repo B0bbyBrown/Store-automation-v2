@@ -10,10 +10,10 @@ const WooCommerce = new WooCommerceRestApi.default({
 
 function transformCategoryNameToSlug(categoryName) {
   return categoryName
-    .toLowerCase() // Convert to lower case
-    .trim() // Remove leading and trailing whitespace
-    .replace(/&/g, "and") // Replace '&' with 'and'
-    .replace(/[\s\W-]+/g, "-"); // Replace spaces, non-word characters, and dashes with a single dash
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[\s\W-]+/g, "-");
 }
 
 // Validate categories
@@ -79,24 +79,24 @@ async function createCategory(categoryData) {
   }
 }
 
-// Delete unused categories
-async function deleteUnusedCategories(usedCategoryNames) {
-  try {
-    const allCategories = await WooCommerce.get("products/categories");
-    const categoriesToDelete = allCategories.data.filter(
-      (cat) => !usedCategoryNames.includes(cat.name)
-    );
+// // Delete unused categories
+// async function deleteUnusedCategories(usedCategoryNames) {
+//   try {
+//     const allCategories = await WooCommerce.get("products/categories");
+//     const categoriesToDelete = allCategories.data.filter(
+//       (cat) => !usedCategoryNames.includes(cat.name)
+//     );
 
-    for (const category of categoriesToDelete) {
-      await WooCommerce.delete(`products/categories/${category.name}`, {
-        force: true, // Ensures the category is permanently deleted
-      });
-      console.log(`Deleted category: ${category.name}`);
-    }
-  } catch (error) {
-    console.error("Error deleting unused categories:", error);
-  }
-}
+//     for (const category of categoriesToDelete) {
+//       await WooCommerce.delete(`products/categories/${category.name}`, {
+//         force: true, // Ensures the category is permanently deleted
+//       });
+//       console.log(`Deleted category: ${category.name}`);
+//     }
+//   } catch (error) {
+//     console.error("Error deleting unused categories:", error);
+//   }
+// }
 
 const setupCategories = async (categoryJson) => {
   try {
@@ -104,15 +104,13 @@ const setupCategories = async (categoryJson) => {
     const categoryNames = [];
 
     for (let categoryData of mappedCategories) {
-      const categoryNames = await createCategory(categoryData);
-      if (categoryNames) {
-        categoryNames.push(categoryNames);
+      const categoryName = await createCategory(categoryData);
+      if (categoryName) {
+        categoryNames.push(categoryName);
       }
     }
 
     console.log("All categories successfully mapped and created or found.");
-    await deleteUnusedCategories(categoryNames);
-    console.log("Unused categories cleaned up successfully.");
   } catch (error) {
     console.error("Error during category setup:", error);
     throw error;
@@ -122,6 +120,6 @@ const setupCategories = async (categoryJson) => {
 export {
   mapCategories,
   createCategory,
-  deleteUnusedCategories,
+  //deleteUnusedCategories,
   setupCategories,
 };

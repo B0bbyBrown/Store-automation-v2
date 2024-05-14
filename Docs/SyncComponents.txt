@@ -1,0 +1,83 @@
+SyncComponents.mjs contains various functions for handling 
+CSV operations and synchronizing products with WooCommerce. 
+
+Here’s a detailed breakdown of its functionality:
+
+
+/Imports: 
+
+ -The script imports necessary modules and functions:
+
+-fs for file system operations.
+-csv-parser for parsing CSV files.
+-path for handling file paths.
+-fsPromises for file system operations using promises.
+-WooCommerceAPI for making API requests to WooCommerce.
+-Transform from stream for stream transformations.
+-handleAPIError for handling API errors.
+-mapCategories from CategoryMapping.mjs for mapping categories.
+-mapProductBasics from ProductMapping.mjs for mapping basic product details.
+
+
+/Functions:
+
+-asyncTransform(operation): 
+ -Returns a transform stream that applies an asynchronous operation to each chunk of data.
+-findLatestCSV(directoryPath): 
+ -Finds the latest CSV file in a directory and its subdirectories based on the modification time.
+-parseCSV(filePath): 
+ -Parses a CSV file and transforms each row asynchronously using asyncTransform. Maps categories and basic product details.
+-getWooCommerceProducts(): 
+ -Fetches products from the WooCommerce store using the WooCommerce API.
+-compareProducts(csvProducts, storeProducts): 
+ -Compares products from the CSV file with products in the WooCommerce store. Identifies new, updated, and products to delete.
+-uploadProducts(newProducts): 
+ -Uploads new products to the WooCommerce store in batches.
+-updateProducts(updatedProducts): 
+ -Updates existing products in the WooCommerce store in batches.
+-deleteProducts(deletedSKUs): 
+ -Deletes products from the WooCommerce store based on SKUs.
+
+
+/Error Handling: 
+
+ -Each function uses handleAPIError to manage errors and retries when interacting with the WooCommerce API.
+
+
+/Function Details
+
+-asyncTransform(operation):
+ -Creates a transform stream that applies the given asynchronous operation to each data chunk.
+ -Pushes the transformed result to the next stream.
+ -Handles errors during transformation.
+
+-findLatestCSV(directoryPath):
+ -Recursively traverses directories to find the most recently modified CSV file.
+ -Returns the path to the latest CSV file.
+
+parseCSV(filePath):
+ -Reads the CSV file and parses it using csv-parser.
+ -Applies transformations to each row, mapping categories and basic product details.
+ -Collects transformed rows into an array and resolves it.
+
+-getWooCommerceProducts():
+ -Fetches products from the WooCommerce store using the WooCommerce API.
+ -Handles errors and retries if necessary.
+
+-compareProducts(csvProducts, storeProducts):
+ -Identifies new and updated products by comparing CSV products with store products.
+ -Uses a mapping to determine which fields to compare and update.
+ -Returns arrays of new and updated products.
+
+-uploadProducts(newProducts):
+ -Uploads new products to the WooCommerce store in batches.
+ -Handles errors and retries if necessary.
+
+-updateProducts(updatedProducts):
+ -Updates existing products in the WooCommerce store in batches.
+ -Handles errors and retries if necessary.
+
+-deleteProducts(deletedSKUs):
+ -Identifies products to delete based on SKUs.
+ -Deletes products from the WooCommerce store in batches.
+ -Handles errors and retries if necessary.

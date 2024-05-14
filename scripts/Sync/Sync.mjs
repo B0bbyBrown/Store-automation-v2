@@ -3,23 +3,28 @@ import {
   findLatestCSV,
   parseCSV,
   getWooCommerceProducts,
+  getWooCommerceCategories,
   compareProducts,
   uploadProducts,
   updateProducts,
   deleteProducts,
 } from "./Modules/SyncModules/SyncComponents.mjs";
-import { setupCategories } from "./Modules/MappingModules/CategoryMapping.mjs";
 import { handleAPIError } from "./Utils/errorHandling.mjs";
 
 dotenv.config({ path: "./scripts/.env" });
 
-async function synchronizeProducts() {
+async function mainSync() {
   console.log("Successfully connected to Woo API.");
   try {
-    const csvProducts = await loadAndParseCSV("./output/final_filter/");
+    const wooCategories = await getWooCommerceCategories();
+    console.log("WooCommerce Categories:", wooCategories);
+
+    const csvProducts = await loadAndParseCSV(
+      "./output/final_filter/",
+      wooCategories
+    );
     if (!csvProducts) return;
 
-    await setupProductCategories(csvProducts);
     await syncWithStore(csvProducts);
   } catch (error) {
     handleAPIError(
@@ -29,25 +34,18 @@ async function synchronizeProducts() {
   }
 }
 
-async function loadAndParseCSV(directoryPath) {
+async function loadAndParseCSV(directoryPath, wooCategories) {
   const latestCSV = await findLatestCSV(directoryPath);
   if (!latestCSV) {
     console.error("No CSV file found.");
     return null;
   }
-  const csvProducts = await parseCSV(latestCSV);
+  const csvProducts = await parseCSV(latestCSV, wooCategories);
   if (!csvProducts.length) {
     console.error("No products found in CSV.");
     return null;
   }
   return csvProducts;
-}
-
-async function setupProductCategories(csvProducts) {
-  const categoriesJson = csvProducts
-    .map((product) => product.categories)
-    .join();
-  await setupCategories(categoriesJson);
 }
 
 async function syncWithStore(csvProducts) {
@@ -60,15 +58,23 @@ async function syncWithStore(csvProducts) {
   console.log(
     `CSV file successfully processed with ${csvProducts.length} products.`
   );
+
   const { newProducts, updatedProducts, productsToDelete } = compareProducts(
     csvProducts,
     storeProducts
   );
-  await uploadProducts(newProducts);
-  await updateProducts(updatedProducts);
-  await deleteProducts(productsToDelete);
+
+  if (newProducts) console.log("New Products:", newProducts);
+  if (updatedProducts) console.log("Updated Products:", updatedProducts);
+  if (productsToDelete) console.log("Products to Delete:", productsToDelete);
+
+  if (newProducts && newProducts.length > 0) await uploadProducts(newProducts);
+  if (updatedProducts && updatedProducts.length > 0)
+    await updateProducts(updatedProducts);
+  if (productsToDelete && productsToDelete.length > 0)
+    await deleteProducts(productsToDelete, storeProducts);
 
   console.log("Product synchronization completed successfully.");
 }
 
-synchronizeProducts();
+export { mainSync };

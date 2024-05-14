@@ -4,7 +4,7 @@ import { mainScraper } from "./CSV-Manipulation/Scraper.mjs";
 import { mainWooRephrase } from "./CSV-Manipulation/WooRephrase.mjs";
 import { mainFinalFilter } from "./Final_Touches/Final-Filter.mjs";
 import { mainFinalTouches } from "./Final_Touches/Final-Touches.mjs";
-// import { mainSync } from "./CSV-Manipulation/WooUpdate.mjs";
+import { mainSync } from "./Sync/Sync.mjs";
 
 async function TheMotherScript() {
   console.log("Starting up The Mother Script...");
@@ -67,14 +67,18 @@ async function TheMotherScript() {
     console.error("Error in mainFinalFilter:", error);
   }
 
-  // // Synchronization
-  // try {
-  //   console.log("Initiating synchronization process...");
-  //   await mainSync();
-  //   console.log("Synchronization process completed successfully.");
-  // } catch (error) {
-  //   console.error("Error in mainSync:", error);
-  // }
+  // 5 Second Delay for Rephrase Completion
+  console.log("Waiting for 15 seconds before initiating final touches...");
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  // Synchronization
+  try {
+    console.log("Initiating synchronization process...");
+    await mainSync();
+    console.log("Synchronization process completed successfully.");
+  } catch (error) {
+    console.error("Error in mainSync:", error);
+  }
 }
 
 TheMotherScript();

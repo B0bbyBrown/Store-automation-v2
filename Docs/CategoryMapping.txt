@@ -1,0 +1,30 @@
+CategoryMapping.mjs is responsible for mapping, 
+creating, and managing product categories in WooCommerce. 
+
+
+Here’s a detailed breakdown of its functionality:
+
+
+/WooCommerce API Initialization:
+
+-Initializes the WooCommerce API using credentials from environment variables (WC_URL, WC_CONSUMER_KEY, WC_CONSUMER_SECRET).
+
+
+/Helper Functions:
+
+-transformCategoryNameToSlug(categoryName): 
+ -Transforms a category name into a URL-friendly slug by converting to lowercase, replacing special characters, and trimming whitespace.
+-isValidCategory(category): 
+ -Checks if a category object has a valid name.
+-mapCategories(categoriesJson): 
+ -Maps category JSON data to a list of category objects with names and slugs. Validates categories and handles parsing errors.
+-createCategory(categoryData): 
+ -Checks if a category exists in WooCommerce, and if not, creates a new category. Returns the name of the category.
+-deleteUnusedCategories(usedCategoryNames): 
+ -Deletes categories from WooCommerce that are not in the list of used category names.
+
+/Main Function (setupCategories):
+
+-Maps categories using mapCategories.
+-Creates or finds categories in WooCommerce using createCategory.
+-Deletes unused categories using deleteUnusedCategories.
