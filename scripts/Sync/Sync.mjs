@@ -77,4 +77,4 @@ async function syncWithStore(csvProducts) {
   console.log("Product synchronization completed successfully.");
 }
 
-export { mainSync };
+mainSync();
