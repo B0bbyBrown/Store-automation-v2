@@ -62,32 +62,15 @@ async function findLatestCSV(directoryPath) {
 }
 
 // Parse CSV file and map categories to WooCommerce categories
-async function parseCSV(filePath, wooCategories) {
+async function parseCSV(filePath, categoryMap) {
   const products = [];
   return new Promise((resolve, reject) => {
     fs.createReadStream(filePath)
       .pipe(csv({ delimiter: ",", columns: true }))
       .pipe(
         asyncTransform(async (row) => {
-          // Map categories from CSV to WooCommerce categories
-          const categories = row.categories
-            ? JSON.parse(row.categories)
-                .map((cat) => {
-                  const wooCategory = wooCategories.find(
-                    (wc) => wc.name.toLowerCase() === cat.name.toLowerCase()
-                  );
-                  if (wooCategory) {
-                    return { id: wooCategory.id };
-                  } else {
-                    console.error(`No match found for category: ${cat.name}`);
-                    return null;
-                  }
-                })
-                .filter(Boolean)
-            : [];
-
-          const basicProduct = mapProductBasics(row);
-          return { ...basicProduct, categories };
+          const basicProduct = mapProductBasics(row, categoryMap);
+          return basicProduct;
         })
       )
       .on("data", (product) => products.push(product))

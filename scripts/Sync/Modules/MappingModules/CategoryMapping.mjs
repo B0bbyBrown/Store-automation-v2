@@ -23,8 +23,6 @@ function isValidCategory(category) {
 
 // Map categories
 async function mapCategories(categoriesJson) {
-  console.log("Received categories:", categoriesJson); // Debug statement
-  console.log("Type of categoriesJson:", typeof categoriesJson); // Debug type
   if (!categoriesJson) {
     console.error("No categories JSON provided");
     return [];
@@ -46,12 +44,10 @@ async function mapCategories(categoriesJson) {
     return [];
   }
 
-  return categories
-    .filter(isValidCategory) // Validate category
-    .map((cat) => ({
-      name: cat.name,
-      slug: transformCategoryNameToSlug(cat.name),
-    }));
+  return categories.filter(isValidCategory).map((cat) => ({
+    name: cat.name,
+    slug: transformCategoryNameToSlug(cat.name),
+  }));
 }
 
 // Create or find category
@@ -64,14 +60,13 @@ async function createCategory(categoryData) {
     });
 
     if (response.data && response.data.length > 0) {
-      return response.data[0].name;
+      return response.data[0]; // Return entire category object including ID
     } else {
-      // Create new category if not found
       const newCategory = await WooCommerce.post(
         "products/categories",
         categoryData
       );
-      return newCategory.data.name;
+      return newCategory.data; // Return entire category object including ID
     }
   } catch (error) {
     console.error("Error creating or finding category:", error);
@@ -101,16 +96,27 @@ async function createCategory(categoryData) {
 const setupCategories = async (categoryJson) => {
   try {
     const mappedCategories = await mapCategories(categoryJson);
-    const categoryNames = [];
+    const categoryMap = {};
 
     for (let categoryData of mappedCategories) {
-      const categoryName = await createCategory(categoryData);
-      if (categoryName) {
-        categoryNames.push(categoryName);
+      const categoryName = categoryData.name;
+      const response = await WooCommerce.get("products/categories", {
+        search: categoryName,
+      });
+
+      if (response.data && response.data.length > 0) {
+        categoryMap[categoryName] = response.data[0].id;
+      } else {
+        const newCategory = await WooCommerce.post(
+          "products/categories",
+          categoryData
+        );
+        categoryMap[categoryName] = newCategory.data.id;
       }
     }
 
     console.log("All categories successfully mapped and created or found.");
+    return categoryMap;
   } catch (error) {
     console.error("Error during category setup:", error);
     throw error;

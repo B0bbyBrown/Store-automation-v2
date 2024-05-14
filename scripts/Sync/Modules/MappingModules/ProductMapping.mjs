@@ -21,7 +21,7 @@ function parseCsvValue(input, delimiter) {
 }
 
 // Map Products
-function mapProductBasics(row) {
+function mapProductBasics(row, categoryMap) {
   if (!validateProductData(row)) {
     console.error("Invalid product data:", row);
     return null;
@@ -31,6 +31,21 @@ function mapProductBasics(row) {
     src: image,
   }));
   const tags = parseCsvValue(row.tags, ",").map((tag) => ({ name: tag }));
+
+  // Handle categories
+  const categories = row.categories
+    ? JSON.parse(row.categories)
+        .map((cat) => {
+          const categoryId = categoryMap[cat.name];
+          if (categoryId) {
+            return { id: categoryId };
+          } else {
+            console.error(`No match found for category: ${cat.name}`);
+            return null;
+          }
+        })
+        .filter(Boolean)
+    : [];
 
   return {
     sku: row.sku,
@@ -51,6 +66,7 @@ function mapProductBasics(row) {
     weight: row.weight || "0",
     manage_stock: true,
     backorders: config.allowBackorders ? "yes" : "no",
+    categories, // Ensure categories are included
   };
 }
 
