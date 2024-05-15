@@ -9,6 +9,13 @@ async function findLatestCSV(directoryPath) {
   let latestFile = null;
   let latestTime = 0;
 
+  // Ensure the directory exists
+  if (!fs.existsSync(directoryPath)) {
+    console.log(`Directory ${directoryPath} does not exist. Creating it...`);
+    fs.mkdirSync(directoryPath, { recursive: true });
+    return null;
+  }
+
   // Recursive function to traverse directories and find CSV files
   async function traverseDirectories(dirPath) {
     const files = await fs.promises.readdir(dirPath);
@@ -56,11 +63,21 @@ function cleanUp(row) {
   return row;
 }
 
-// Function to transform the category hierarchy string into an array of category objects
+// Function to transform category name to slug
+function transformCategoryNameToSlug(categoryName) {
+  return categoryName
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[\s\W-]+/g, "-");
+}
+
+// Function to transform the category hierarchy string into an array of category objects with IDs
 function transformCategoryHierarchy(hierarchy) {
-  return hierarchy
-    .split(" > ")
-    .map((categoryName) => ({ name: categoryName.trim() }));
+  return hierarchy.split(" > ").map((categoryName) => {
+    const slug = transformCategoryNameToSlug(categoryName);
+    return { id: slug, name: categoryName.trim(), slug: slug };
+  });
 }
 
 // Adjust price by 10%
@@ -110,7 +127,7 @@ async function mainFinalTouches() {
           }
 
           try {
-            const transformedRow = await transformRow(row);
+            const transformedRow = transformRow(row);
             productCount++;
             callback(null, transformedRow);
           } catch (error) {
@@ -131,5 +148,7 @@ async function mainFinalTouches() {
     console.error("Error writing the CSV file:", error);
   });
 }
+
+mainFinalTouches();
 
 export { mainFinalTouches };
