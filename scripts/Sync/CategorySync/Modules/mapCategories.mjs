@@ -7,38 +7,33 @@ function transformCategoryNameToSlug(categoryName) {
 }
 
 function isValidCategory(category) {
-  return category && category.name && category.name.trim() !== "";
+  return category && typeof category === "string" && category.trim() !== "";
 }
 
-async function mapCategories(categoriesJson) {
-  console.log("Received categories:", categoriesJson);
-  console.log("Type of categoriesJson:", typeof categoriesJson);
+async function mapCategories(categoriesArray) {
+  console.log("Received categories:", categoriesArray);
+  console.log("Type of categoriesArray:", typeof categoriesArray);
 
-  if (!categoriesJson) {
-    console.error("No categories JSON provided");
+  if (!categoriesArray) {
+    console.error("No categories array provided");
     return [];
   }
 
-  let categories;
-  try {
-    categories =
-      typeof categoriesJson === "string"
-        ? JSON.parse(categoriesJson)
-        : categoriesJson;
-
-    if (!Array.isArray(categories) || categories.length === 0) {
-      console.warn("Categories JSON is empty or not an array");
-      return [];
-    }
-  } catch (error) {
-    console.error("Failed to parse categories JSON", error);
+  if (!Array.isArray(categoriesArray) || categoriesArray.length === 0) {
+    console.warn("Categories array is empty or not an array");
     return [];
   }
 
-  return categories.filter(isValidCategory).map((cat) => ({
-    name: cat.name,
-    slug: transformCategoryNameToSlug(cat.name),
-  }));
+  const validCategories = categoriesArray
+    .filter(isValidCategory)
+    .map((name) => ({
+      name,
+      slug: transformCategoryNameToSlug(name),
+    }));
+
+  console.log("Mapped categories:", validCategories);
+
+  return validCategories;
 }
 
 export { mapCategories };

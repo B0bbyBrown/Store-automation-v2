@@ -1,5 +1,4 @@
-import { createCategory } from "./Modules/createCategory.mjs";
-import { mapCategories } from "./Modules/mapCategories.mjs";
-import { setupCategories } from "./Modules/setupCategories.mjs";
+import { setupCategories } from "./setupCategories.mjs";
+import { fetchExistingCategories } from "./fetchExistingCategories.mjs";
 
-export { createCategory, mapCategories, setupCategories };
+export { setupCategories, fetchExistingCategories };

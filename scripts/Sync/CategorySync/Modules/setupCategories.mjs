@@ -1,49 +1,69 @@
 import { mapCategories } from "./mapCategories.mjs";
 import { createCategory } from "./createCategory.mjs";
+import { getWooCommerceCategories } from "../../ProductSync/Modules/getWooCommerceCategories.mjs";
+const BATCH_SIZE = 50;
 
 const setupCategories = async (csvProducts) => {
   try {
-    // Step 1: Extract unique category names
+    const existingCategories = await getWooCommerceCategories();
+    console.log(
+      `Fetched ${existingCategories.length} existing categories from WooCommerce.`
+    );
+
     const categoryNamesSet = new Set();
     csvProducts.forEach((product) => {
-      product.categories.forEach((category) => {
-        categoryNamesSet.add(category.name);
-      });
+      if (Array.isArray(product.categories)) {
+        product.categories.forEach((category) => {
+          if (category && category.name) {
+            categoryNamesSet.add(category.name);
+          }
+        });
+      } else {
+        console.error(
+          "Product categories is not an array:",
+          product.categories
+        );
+      }
     });
 
     const categoriesArray = Array.from(categoryNamesSet);
-    const categoriesJson = JSON.stringify(categoriesArray);
-
     console.log("Unique category names:", categoriesArray);
 
-    // Step 2: Map categories
-    const mappedCategories = await mapCategories(categoriesJson);
+    const mappedCategories = await mapCategories(categoriesArray);
     console.log("Mapped categories:", mappedCategories);
 
     const createdCategories = {};
 
-    // Step 3: Create categories if they don't exist
-    for (let categoryData of mappedCategories) {
-      const category = await createCategory(categoryData);
-      if (category) {
-        createdCategories[category.name] = category.id;
-      }
+    for (let i = 0; i < mappedCategories.length; i += BATCH_SIZE) {
+      const batch = mappedCategories.slice(i, i + BATCH_SIZE);
+      const categoryPromises = batch.map(async (categoryData) => {
+        const category = await createCategory(categoryData);
+        if (category) {
+          createdCategories[category.name] = category.id;
+        }
+      });
+      await Promise.all(categoryPromises);
     }
 
     console.log("Created categories with IDs:", createdCategories);
 
-    // Step 4: Assign created category IDs to products
     csvProducts.forEach((product) => {
-      product.categories = product.categories.map((cat) => {
-        return {
-          id: createdCategories[cat.name],
-          name: cat.name,
-        };
-      });
+      if (Array.isArray(product.categories)) {
+        product.categories = product.categories
+          .map((cat) => {
+            const categoryId = createdCategories[cat.name];
+            return categoryId ? { id: categoryId, name: cat.name } : null;
+          })
+          .filter(Boolean);
+      } else {
+        console.error(
+          "Product categories is not an array:",
+          product.categories
+        );
+      }
       console.log("Product after assigning category IDs:", product);
     });
 
-    console.log("All categories successfully mapped and created or found.");
     return csvProducts;
   } catch (error) {
     console.error("Error during category setup:", error);

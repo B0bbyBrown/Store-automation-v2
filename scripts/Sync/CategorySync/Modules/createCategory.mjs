@@ -9,13 +9,15 @@ const createCategory = async (categoryData) => {
     });
 
     if (response.data && response.data.length > 0) {
-      return response.data[0]; // Return the existing category
+      // If the category already exists, return the existing category
+      return response.data[0];
     } else {
+      // If the category does not exist, create a new one
       const newCategory = await WooCommerce.post(
         "products/categories",
         categoryData
       );
-      return newCategory.data; // Return the newly created category
+      return newCategory.data;
     }
   } catch (error) {
     console.error("Error creating or finding category:", error);

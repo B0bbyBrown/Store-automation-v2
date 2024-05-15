@@ -82,7 +82,7 @@ function transformCategoryHierarchy(hierarchy) {
 
 // Adjust price by 10%
 function adjustPrice(price) {
-  const adjustedPrice = parseFloat(price) * 1.1;
+  const adjustedPrice = parseFloat(price) * 1.0;
   return adjustedPrice.toFixed(2);
 }
 

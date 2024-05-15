@@ -1,72 +1,56 @@
-import WooCommerce from "./Api/apiConfig.mjs";
-import { setupCategories } from "./CategorySync/index.mjs";
+// sync.mjs
+
 import {
-  processProducts,
-  mapProductBasics,
   findLatestCSV,
   parseCSV,
-} from "./ProductSync/index.mjs";
-import { handleAPIError } from "./utils/errorHandling.mjs";
+  setupCategories,
+  fetchExistingCategories,
+  getWooCommerceProducts,
+  mapProductBasics,
+  processProducts,
+  uploadProductsInBatches,
+} from "./index.mjs";
 
-const mainSync = async () => {
-  console.log("Starting synchronization process...");
-
-  const csvDirectoryPath = "./output/final_filter";
-
-  let csvFilePath;
+async function mainSync() {
   try {
-    csvFilePath = await findLatestCSV(csvDirectoryPath); // Await the function
+    console.log("Starting synchronization process...");
+
+    // Fetch latest CSV data
+    const csvFilePath = await findLatestCSV("./output/final_filter");
+    console.log(`Found latest CSV file: ${csvFilePath}`);
+    const csvData = await parseCSV(csvFilePath);
+    console.log(
+      `CSV file successfully processed with ${csvData.length} products.`
+    );
+
+    // Fetch existing categories from WooCommerce
+    const existingCategories = await fetchExistingCategories();
+    console.log(
+      `Fetched ${existingCategories.length} existing categories from WooCommerce.`
+    );
+
+    // Set up categories in WooCommerce
+    const csvDataWithCategories = await setupCategories(csvData);
+    console.log("CSV data after category setup:", csvDataWithCategories);
+
+    // Fetch existing products from WooCommerce
+    const storeProducts = await getWooCommerceProducts();
+    console.log(`Fetched ${storeProducts.length} products from WooCommerce.`);
+
+    // Map product basics before processing
+    const mappedProducts = csvDataWithCategories.map(mapProductBasics);
+    console.log("Mapped products:", mappedProducts);
+
+    // Process products for synchronization
+    await processProducts(mappedProducts, storeProducts);
+
+    // Upload products in batches with delay
+    await uploadProductsInBatches(mappedProducts);
+
+    console.log("Synchronization process completed successfully.");
   } catch (error) {
-    console.error("Error finding the latest CSV file:", error);
-    return;
+    console.error("Error during synchronization process:", error);
   }
-
-  console.log("Found latest CSV file:", csvFilePath);
-
-  const csvProducts = [];
-  try {
-    const parsedCsv = await parseCSV(csvFilePath);
-    for (const row of parsedCsv) {
-      // Parse categories back to array
-      if (row.categories) {
-        row.categories = JSON.parse(row.categories);
-      }
-      const product = mapProductBasics(row);
-      if (product) {
-        csvProducts.push(product);
-      }
-    }
-  } catch (error) {
-    console.error("Error parsing CSV file:", error);
-    return;
-  }
-
-  console.log(
-    "CSV file successfully processed with",
-    csvProducts.length,
-    "products."
-  );
-
-  // Log categories before setup
-  csvProducts.forEach((product) => {
-    console.log("Product categories before setup:", product.categories);
-  });
-
-  try {
-    const updatedProducts = await setupCategories(csvProducts);
-
-    // Log categories after setup
-    updatedProducts.forEach((product) => {
-      console.log("Product categories after setup:", product.categories);
-    });
-
-    const response = await WooCommerce.get("products", { per_page: 100 });
-    const storeProducts = response.data;
-
-    await processProducts(updatedProducts, storeProducts);
-  } catch (error) {
-    handleAPIError(error, "Error during synchronization process");
-  }
-};
+}
 
 mainSync();
