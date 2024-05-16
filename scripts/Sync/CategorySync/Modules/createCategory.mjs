@@ -1,7 +1,7 @@
 import WooCommerce from "../../Api/apiConfig.mjs";
 
 const createCategory = async (categoryData) => {
-  console.log("Creating or finding category:", categoryData.name);
+  //console.log("Creating or finding category:", categoryData.name);
 
   try {
     const response = await WooCommerce.get("products/categories", {
@@ -20,7 +20,7 @@ const createCategory = async (categoryData) => {
       return newCategory.data;
     }
   } catch (error) {
-    console.error("Error creating or finding category:", error);
+    console.error("Error creating or finding category:" /*error*/);
     return null;
   }
 };

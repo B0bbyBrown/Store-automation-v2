@@ -27,10 +27,10 @@ const setupCategories = async (csvProducts) => {
     });
 
     const categoriesArray = Array.from(categoryNamesSet);
-    console.log("Unique category names:", categoriesArray);
+    //console.log("Unique category names:", categoriesArray);
 
     const mappedCategories = await mapCategories(categoriesArray);
-    console.log("Mapped categories:", mappedCategories);
+    //console.log("Mapped categories:", mappedCategories);
 
     const createdCategories = {};
 
@@ -45,7 +45,7 @@ const setupCategories = async (csvProducts) => {
       await Promise.all(categoryPromises);
     }
 
-    console.log("Created categories with IDs:", createdCategories);
+    //console.log("Created categories with IDs:", createdCategories);
 
     csvProducts.forEach((product) => {
       if (Array.isArray(product.categories)) {
@@ -61,12 +61,12 @@ const setupCategories = async (csvProducts) => {
           product.categories
         );
       }
-      console.log("Product after assigning category IDs:", product);
+      //console.log("Product after assigning category IDs:", product);
     });
 
     return csvProducts;
   } catch (error) {
-    console.error("Error during category setup:", error);
+    console.error("Error during category setup:" /*error*/);
     throw error;
   }
 };

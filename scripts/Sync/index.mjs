@@ -5,8 +5,7 @@ import { getWooCommerceProducts } from "./ProductSync/Modules/getWooCommerceProd
 import { parseCSV } from "./ProductSync/Modules/parseCSV.mjs";
 import { mapProductBasics } from "./ProductSync/Modules/mapProductBasics.mjs";
 import { setupCategories } from "./categorySync/Modules/setupCategories.mjs";
-import { fetchExistingCategories } from "./categorySync/Modules/fetchExistingCategories.mjs";
-import { uploadProductsInBatches } from "./ProductSync/Modules/uploadProductsInBatches.mjs";
+import { fetchExistingCategories } from "./CategorySync/Modules/fetchExistingCategories.mjs";
 
 export {
   processProducts,
@@ -17,5 +16,4 @@ export {
   mapProductBasics,
   setupCategories,
   fetchExistingCategories,
-  uploadProductsInBatches,
 };

@@ -15,7 +15,7 @@ async function TheMotherScript() {
     await mainDownload();
     console.log("Download process completed successfully.");
   } catch (error) {
-    console.error("Error in mainDownload:", error);
+    console.error("Error in mainDownload:" /*error*/);
   }
 
   // Conversion
@@ -24,7 +24,7 @@ async function TheMotherScript() {
     await mainConversion();
     console.log("Conversion process completed successfully.");
   } catch (error) {
-    console.error("Error in mainConversion:", error);
+    console.error("Error in mainConversion:" /*error*/);
   }
 
   // Product Scraper
@@ -33,7 +33,7 @@ async function TheMotherScript() {
     await mainScraper();
     console.log("Scraping process completed successfully.");
   } catch (error) {
-    console.error("Error in mainScraper:", error);
+    console.error("Error in mainScraper:" /*error*/);
   }
 
   // Rephrasing
@@ -42,7 +42,7 @@ async function TheMotherScript() {
     await mainWooRephrase();
     console.log("Rephrasing process completed successfully.");
   } catch (error) {
-    console.error("Error in mainWooRephrase:", error);
+    console.error("Error in mainWooRephrase:" /*error*/);
   }
 
   // 15 Second Delay for Rephrase Completion
@@ -55,7 +55,7 @@ async function TheMotherScript() {
     await mainFinalTouches();
     console.log("Final touches process completed successfully.");
   } catch (error) {
-    console.error("Error in mainFinalTouches:", error);
+    console.error("Error in mainFinalTouches:" /*error*/);
   }
 
   // Final Filter
@@ -64,21 +64,21 @@ async function TheMotherScript() {
     await mainFinalFilter();
     console.log("Final filter process completed successfully.");
   } catch (error) {
-    console.error("Error in mainFinalFilter:", error);
+    console.error("Error in mainFinalFilter:" /*error*/);
   }
 
-  //   // 5 Second Delay for Rephrase Completion
-  //   console.log("Waiting for 5 seconds before initiating final touches...");
-  //   await new Promise((resolve) => setTimeout(resolve, 5000));
+  // 5 Second Delay for Rephrase Completion
+  console.log("Waiting for 5 seconds before initiating final touches...");
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  //   // Synchronization
-  //   try {
-  //     console.log("Initiating synchronization process...");
-  //     await mainSync();
-  //     console.log("Synchronization process completed successfully.");
-  //   } catch (error) {
-  //     console.error("Error in mainSync:", error);
-  //   }
+  // // Synchronization
+  // try {
+  //   console.log("Initiating synchronization process...");
+  //   await mainSync();
+  //   console.log("Synchronization process completed successfully.");
+  // } catch (error) {
+  //   console.error("Error in mainSync:", error);
+  // }
 }
 
 TheMotherScript();

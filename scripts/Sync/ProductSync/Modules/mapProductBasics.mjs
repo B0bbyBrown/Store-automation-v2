@@ -41,7 +41,6 @@ function mapProductBasics(row) {
     description: row.description || "",
     tags,
     meta_data: row.meta_data,
-    weight: row.weight || "0",
     manage_stock: true,
     backorders: false,
     categories: row.categories, // Assuming it's already an array of objects

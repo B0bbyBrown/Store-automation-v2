@@ -19,7 +19,7 @@ const processProducts = async (csvProducts, storeProducts) => {
       await uploadProducts(newProducts);
       console.log("New products uploaded successfully.");
     } catch (error) {
-      console.error("Error uploading new products:", error);
+      console.error("Error uploading new products:" /*error*/);
     }
   }
 
@@ -28,7 +28,7 @@ const processProducts = async (csvProducts, storeProducts) => {
       await updateProducts(updatedProducts);
       console.log("Products updated successfully.");
     } catch (error) {
-      console.error("Error updating products:", error);
+      console.error("Error updating products:" /*error*/);
     }
   }
 
@@ -37,7 +37,7 @@ const processProducts = async (csvProducts, storeProducts) => {
       await deleteProducts(productsToDelete, storeProducts);
       console.log("Products deleted successfully.");
     } catch (error) {
-      console.error("Error deleting products:", error);
+      console.error("Error deleting products:" /*error*/);
     }
   }
 };
