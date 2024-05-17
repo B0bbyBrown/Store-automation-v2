@@ -47,4 +47,4 @@ async function mainSync() {
   }
 }
 
-mainSync();
+export { mainSync };

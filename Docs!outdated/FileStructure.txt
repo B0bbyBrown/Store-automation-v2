@@ -1,48 +1,43 @@
-Store-automation-v2
-├── .vscode
-├── Docs
-├── node_modules
-├── output
-├── scripts
-│   ├── CSV-Manipulation
-│   │   ├── Conversion.mjs
-│   │   ├── Download.mjs
-│   │   ├── Scraper.mjs
-│   │   └── WooRephrase.mjs
-│   ├── Final_Touches
-│   │   ├── Modules
-│   │   │   ├── configManager.mjs
-│   │   │   ├── csvHandler.mjs
-│   │   │   └── logger.mjs
-│   │   ├── config.json
-│   │   └── Final-Filter.mjs
-│   ├── Sync
-│   │   ├── api
-│   │   │   └── apiConfig.mjs
-│   │   ├── CategorySync
-│   │   │   ├── Modules
-│   │   │   │   ├── createCategory.mjs
-│   │   │   │   ├── mapCategories.mjs
-│   │   │   │   ├── setupCategories.mjs
-│   │   │   │   └── utils.mjs
-│   │   │   └── index.mjs
-│   │   ├── ProductSync
-│   │   │   ├── Modules
-│   │   │   │   ├── compareProducts.mjs
-│   │   │   │   ├── deleteProducts.mjs
-│   │   │   │   ├── findLatestCSV.mjs
-│   │   │   │   ├── getWooCommerceCategories.mjs
-│   │   │   │   ├── getWooCommerceProducts.mjs
-│   │   │   │   ├── mapProductBasics.mjs
-│   │   │   │   ├── parseCSV.mjs
-│   │   │   │   ├── processProducts.mjs
-│   │   │   │   ├── updateProducts.mjs
-│   │   │   │   ├── uploadProducts.mjs
-│   │   │   │   └── utils.mjs
-│   │   │   └── index.mjs
-│   │   ├── utils
-│   │   │   └── errorHandling.mjs
-│   │   └── Sync.mjs
-│   ├── .env
-│   └── The-Mother-Script.mjs
-├── .gitignore
+scripts/
+├── CSV-Manipulation/
+│   ├── Conversion.mjs
+│   ├── Download.mjs
+│   ├── Scraper.mjs
+│   └── WooRephrase.mjs
+├── Final_Touches/
+│   ├── Modules/
+│   │   ├── configManager.mjs
+│   │   ├── csvHandler.mjs
+│   │   ├── logger.mjs
+│   │   └── config.json
+│   ├── Final-Filter.mjs
+│   └── Final-Touches.mjs
+├── Sync/
+│   ├── Api/
+│   │   └── apiConfig.mjs
+│   ├── CategorySync/
+│   │   ├── Modules/
+│   │   │   ├── createCategory.mjs
+│   │   │   ├── fetchExistingCategories.mjs
+│   │   │   ├── mapCategories.mjs
+│   │   │   ├── setupCategories.mjs
+│   │   │   └── utils.mjs
+│   │   └── index.mjs
+│   ├── ProductSync/
+│   │   ├── Modules/
+│   │   │   ├── compareProducts.mjs
+│   │   │   ├── deleteProducts.mjs
+│   │   │   ├── findLatestCSV.mjs
+│   │   │   ├── getWooCommerceCategories.mjs
+│   │   │   ├── getWooCommerceProducts.mjs
+│   │   │   ├── mapProductBasics.mjs
+│   │   │   ├── parseCSV.mjs
+│   │   │   ├── processProducts.mjs
+│   │   │   ├── updateProducts.mjs
+│   │   │   └── uploadProducts.mjs
+│   │   └── index.mjs
+│   ├── utils/
+│   │   └── errorHandling.mjs
+│   └── Sync.mjs
+├── .env
+└── The-Mother-Script.mjs
