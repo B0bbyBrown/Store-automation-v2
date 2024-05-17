@@ -119,7 +119,7 @@ async function mainFinalTouches() {
       new Transform({
         objectMode: true,
         transform: async (row, encoding, callback) => {
-          if (productCount >= 5000) {
+          if (productCount >= 500) {
             // Stop processing further rows
             writeStream.end();
             callback(); // Signal completion without transforming
